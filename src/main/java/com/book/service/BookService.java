@@ -23,6 +23,9 @@ public class BookService {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public List<Book> selectByCid(Integer cid){
         return bookMapper.selectByCategoryId(cid);
     }
@@ -90,6 +93,12 @@ public class BookService {
         if(orderResult <= 0){
             return "error_order_create_failed";
         }
+
+        // 下单成功后推送站内消息；推送失败不影响这次交易
+        notificationService.push(userId, NotificationService.TYPE_ORDER,
+                "下单成功",
+                "《" + book.getBookName() + "》×" + num + "，共 ¥" + totalMoney + "，订单号 #" + order.getId(),
+                order.getId());
 
         return "success";
     }

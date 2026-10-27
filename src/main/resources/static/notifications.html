@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>消息中心</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.nav-right a:hover { background: rgba(255,255,255,0.35); }
+.container { max-width: 860px; margin: 30px auto; padding: 0 20px; }
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+}
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.card-head h2 {
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.card-head h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+.badge {
+    display: inline-block;
+    min-width: 20px;
+    padding: 1px 7px;
+    margin-left: 8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+.btn-all {
+    background: #fff;
+    color: #667eea;
+    border: 1px solid #c7d2fe;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.btn-all:hover { background: #eef2ff; }
+.item {
+    display: flex;
+    gap: 14px;
+    padding: 18px 16px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.item:hover { border-color: #c7d2fe; background: #fafbff; }
+.item.unread { background: #f7f9ff; border-color: #dbe4ff; }
+.item.unread .title { font-weight: 700; }
+.item .icon { font-size: 22px; line-height: 1.2; }
+.item .body-wrap { flex: 1; }
+.item .title { font-size: 15px; color: #333; display: flex; align-items: center; gap: 8px; }
+.item .content { font-size: 14px; color: #666; margin-top: 6px; line-height: 1.6; word-break: break-word; }
+.item .time { font-size: 12px; color: #aaa; margin-top: 8px; }
+.dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #e74c3c; display: inline-block;
+}
+.btn-del {
+    align-self: flex-start;
+    background: transparent;
+    color: #bbb;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+.btn-del:hover { color: #e74c3c; }
+.empty { text-align: center; padding: 60px 0; color: #999; font-size: 14px; }
+.msg {
+    position: fixed; top: 24px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 12px 26px; border-radius: 10px; color: white;
+    font-size: 14px; opacity: 0; transition: all 0.3s; z-index: 200; pointer-events: none;
+}
+.msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.msg.success { background: #27ae60; }
+.msg.error { background: #e74c3c; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>🔔 消息中心</h1>
+    <div class="nav-right">
+        <a href="/user/index">← 返回商城</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-head">
+            <h2>全部消息 <span class="badge" id="unreadBadge" style="display:none;">0</span></h2>
+            <button class="btn-all" onclick="readAll()">全部标为已读</button>
+        </div>
+        <div id="list"><div class="empty">加载中...</div></div>
+    </div>
+</div>
+
+<div class="msg" id="msgBox"></div>
+
+<script>
+let cache = [];
+
+function esc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+function fmtTime(t) {
+    if (!t) return '';
+    return String(t).replace('T', ' ').substring(0, 19);
+}
+function showMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg show ' + (type || 'success');
+    setTimeout(() => { box.className = 'msg ' + (type || 'success'); }, 2400);
+}
+function iconOf(type) {
+    if (type == 1) return '📦';
+    if (type == 2) return '💬';
+    return '📢';
+}
+function typeName(type) {
+    if (type == 1) return '订单';
+    if (type == 2) return '反馈';
+    return '系统';
+}
+
+function render() {
+    const box = document.getElementById('list');
+    const badge = document.getElementById('unreadBadge');
+    const unread = cache.filter(n => n.isRead == 0).length;
+    if (unread > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = unread;
+    } else {
+        badge.style.display = 'none';
+    }
+
+    if (cache.length === 0) {
+        box.innerHTML = '<div class="empty">暂时没有消息</div>';
+        return;
+    }
+    box.innerHTML = cache.map(n =>
+        '<div class="item ' + (n.isRead == 0 ? 'unread' : '') + '" onclick="markRead(' + n.id + ')">' +
+            '<div class="icon">' + iconOf(n.type) + '</div>' +
+            '<div class="body-wrap">' +
+                '<div class="title">' +
+                    (n.isRead == 0 ? '<span class="dot"></span>' : '') +
+                    esc(n.title) +
+                '</div>' +
+                '<div class="content">' + esc(n.content || '') + '</div>' +
+                '<div class="time">' + typeName(n.type) + ' · ' + fmtTime(n.createTime) + '</div>' +
+            '</div>' +
+            '<button class="btn-del" title="删除" onclick="event.stopPropagation();del(' + n.id + ')">×</button>' +
+        '</div>'
+    ).join('');
+}
+
+function load() {
+    fetch('/notification/list')
+        .then(r => r.json())
+        .then(res => {
+            if (!res.success) {
+                document.getElementById('list').innerHTML =
+                    '<div class="empty" style="color:#e74c3c;">' + esc(res.message) + '</div>';
+                return;
+            }
+            cache = res.data || [];
+            render();
+        })
+        .catch(() => {
+            document.getElementById('list').innerHTML = '<div class="empty" style="color:#e74c3c;">加载失败</div>';
+        });
+}
+
+function markRead(id) {
+    const item = cache.find(n => n.id == id);
+    if (!item || item.isRead == 1) return;
+    const body = new URLSearchParams();
+    body.append('id', id);
+    fetch('/notification/read', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                item.isRead = 1;
+                render();
+            }
+        })
+        .catch(() => {});
+}
+
+function readAll() {
+    fetch('/notification/read-all', { method: 'POST' })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                cache.forEach(n => { n.isRead = 1; });
+                render();
+                showMsg('已全部标为已读', 'success');
+            }
+        })
+        .catch(() => showMsg('操作失败', 'error'));
+}
+
+function del(id) {
+    const body = new URLSearchParams();
+    body.append('id', id);
+    fetch('/notification/delete', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                cache = cache.filter(n => n.id != id);
+                render();
+            } else {
+                showMsg('删除失败', 'error');
+            }
+        })
+        .catch(() => showMsg('删除失败', 'error'));
+}
+
+load();
+</script>
+</body>
+</html>

@@ -192,6 +192,32 @@ tr:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(46,204,113,0.4);
 }
+.btn-comment {
+    display: inline-block;
+    padding: 10px 18px;
+    margin-left: 8px;
+    background: #fff;
+    color: #667eea;
+    border: 1px solid #c7d2fe;
+    border-radius: 10px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+.btn-comment:hover { background: #eef2ff; }
+.unread-dot {
+    display: inline-block;
+    min-width: 17px;
+    padding: 0 5px;
+    margin-left: 4px;
+    background: #e74c3c;
+    color: #fff;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 17px;
+}
 .empty-row td {
     text-align: center;
     padding: 60px 12px;
@@ -378,6 +404,8 @@ tr:hover {
     <div class="nav-right">
         <div class="balance-box">余额: <strong id="userBalance">加载中...</strong> 元</div>
         <a href="/recommend.html">智能推荐</a>
+        <a href="/myComments.html">我的评价</a>
+        <a href="/notifications.html">消息<span class="unread-dot" id="unreadDot" style="display:none;">0</span></a>
         <a href="/feedback.html">我的反馈</a>
         <a href="/recharge.html">充值</a>
         <a href="/myOrders.html">我的订单</a>
@@ -523,10 +551,12 @@ function renderBooks() {
             let actionCell = '';
             if (book.stock > 0) {
                 actionCell = '<input type="number" id="num_' + book.id + '" value="1" min="1" max="' + book.stock + '" class="buy-input"></td>' +
-                    '<td><button class="btn-buy" data-book-id="' + book.id + '" onclick="confirmBuyById(' + book.id + ')">购买</button>';
+                    '<td><button class="btn-buy" data-book-id="' + book.id + '" onclick="confirmBuyById(' + book.id + ')">购买</button>' +
+                    commentLink(book.id);
             } else {
                 stockCell = '<span style="color:#e74c3c;font-weight:600;">缺货</span>';
-                actionCell = '-</td><td><button class="btn-buy" style="background:linear-gradient(135deg,#ff9800 0%,#f57c00 100%);" data-book-id="' + book.id + '" onclick="console.log(\'点击反馈按钮, ID: ' + book.id + '\'); showFeedbackModalById(' + book.id + ')">反馈缺货</button>';
+                actionCell = '-</td><td><button class="btn-buy" style="background:linear-gradient(135deg,#ff9800 0%,#f57c00 100%);" data-book-id="' + book.id + '" onclick="console.log(\'点击反馈按钮, ID: ' + book.id + '\'); showFeedbackModalById(' + book.id + ')">反馈缺货</button>' +
+                    commentLink(book.id);
             }
             html += '<tr>' +
                 '<td><span class="book-title">' + book.bookName + '</span></td>' +
@@ -699,7 +729,25 @@ function loadHotBooks() {
                 '<div style="grid-column:span 3;text-align:center;color:#e74c3c;padding:20px;">加载失败</div>';
         });
 }
+function commentLink(bookId) {
+    return '<a class="btn-comment" href="/bookComments.html?bookId=' + bookId + '" target="_blank">评论</a>';
+}
+
+function loadUnread() {
+    fetch('/notification/unread-count')
+        .then(r => r.json())
+        .then(res => {
+            const dot = document.getElementById('unreadDot');
+            if (res && res.count > 0) {
+                dot.style.display = 'inline-block';
+                dot.textContent = res.count;
+            }
+        })
+        .catch(() => {});
+}
+
 loadHotBooks();
+loadUnread();
 </script>
 </body>
 </html>

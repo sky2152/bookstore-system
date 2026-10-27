@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>我的评价</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.nav-right a:hover { background: rgba(255,255,255,0.35); }
+.container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+}
+.card h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th {
+    background: #f8f9fa;
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 2px solid #e5e7eb;
+}
+td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+tr:hover { background: #fafbfc; }
+.price { color: #e67e22; font-weight: 700; }
+.book-title { font-weight: 600; color: #333; }
+.order-time { color: #999; font-size: 13px; }
+.empty-row td { text-align: center; padding: 50px 12px; color: #999; }
+.btn-rate {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s;
+}
+.btn-rate:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+.btn-del {
+    background: #fff;
+    color: #e74c3c;
+    border: 1px solid #f5c6cb;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.btn-del:hover { background: #fdecea; }
+.stars { color: #f39c12; letter-spacing: 2px; font-size: 15px; }
+.stars .off { color: #ddd; }
+.comment-item { padding: 16px 0; border-bottom: 1px solid #f0f0f0; }
+.comment-item:last-child { border-bottom: none; }
+.comment-head { display: flex; justify-content: space-between; align-items: center; }
+.comment-body { font-size: 14px; line-height: 1.7; color: #555; margin-top: 8px; word-break: break-word; }
+.pin-tag {
+    display: inline-block; padding: 2px 8px; margin-left: 8px;
+    background: #fdecea; color: #c0392b; border-radius: 10px; font-size: 12px;
+}
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+.modal.show { display: flex; }
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px 34px;
+    width: 440px;
+    max-width: 92vw;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+.modal-content h3 { font-size: 18px; margin-bottom: 6px; }
+.modal-content .sub { color: #888; font-size: 13px; margin-bottom: 18px; }
+.star-picker { font-size: 30px; color: #ddd; cursor: pointer; user-select: none; margin-bottom: 16px; }
+.star-picker span { transition: color 0.15s; }
+.star-picker span.on { color: #f39c12; }
+textarea {
+    width: 100%;
+    height: 110px;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+}
+textarea:focus { border-color: #667eea; }
+.modal-actions { display: flex; gap: 12px; margin-top: 18px; }
+.btn-confirm {
+    flex: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+}
+.btn-cancel {
+    flex: 1;
+    background: #f1f3f5;
+    color: #555;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+}
+.msg {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 12px 26px;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+}
+.msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.msg.success { background: #27ae60; }
+.msg.error { background: #e74c3c; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>⭐ 我的评价</h1>
+    <div class="nav-right">
+        <a href="/user/index">← 返回商城</a>
+        <a href="/myOrders.html">我的订单</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>待评价订单</h2>
+        <table id="pendingTable">
+            <tr><th>订单号</th><th>图书</th><th>数量</th><th>金额</th><th>下单时间</th><th>操作</th></tr>
+            <tr class="empty-row"><td colspan="6">加载中...</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>我写过的评价</h2>
+        <div id="myComments"><div class="empty-row">加载中...</div></div>
+    </div>
+</div>
+
+<div class="modal" id="rateModal">
+    <div class="modal-content">
+        <h3>写下你的评价</h3>
+        <div class="sub" id="rateBookName"></div>
+        <div class="star-picker" id="starPicker">
+            <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span>
+            <span data-v="4">★</span><span data-v="5">★</span>
+        </div>
+        <textarea id="rateContent" maxlength="500" placeholder="说说这本书怎么样（选填，最多 500 字）"></textarea>
+        <div class="modal-actions">
+            <button class="btn-confirm" onclick="submitRate()">提交评价</button>
+            <button class="btn-cancel" onclick="closeRate()">取消</button>
+        </div>
+    </div>
+</div>
+
+<div class="msg" id="msgBox"></div>
+
+<script>
+let currentOrderId = null;
+let currentRating = 5;
+
+function esc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+function starsOf(n) {
+    n = Math.round(n || 0);
+    let html = '';
+    for (let i = 1; i <= 5; i++) html += i <= n ? '★' : '<span class="off">☆</span>';
+    return html;
+}
+function fmtTime(t) {
+    if (!t) return '';
+    return String(t).replace('T', ' ').substring(0, 19);
+}
+function showMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg show ' + (type || 'success');
+    setTimeout(() => { box.className = 'msg ' + (type || 'success'); }, 2600);
+}
+
+// ---------- 待评价订单 ----------
+function loadPending() {
+    fetch('/comment/pending')
+        .then(r => r.json())
+        .then(res => {
+            const table = document.getElementById('pendingTable');
+            if (!res.success) {
+                table.innerHTML = '<tr class="empty-row"><td colspan="6">' + esc(res.message) + '</td></tr>';
+                return;
+            }
+            const data = res.data || [];
+            if (data.length === 0) {
+                table.innerHTML = '<tr><th>订单号</th><th>图书</th><th>数量</th><th>金额</th><th>下单时间</th><th>操作</th></tr>' +
+                    '<tr class="empty-row"><td colspan="6">没有待评价的订单</td></tr>';
+                return;
+            }
+            table.innerHTML = '<tr><th>订单号</th><th>图书</th><th>数量</th><th>金额</th><th>下单时间</th><th>操作</th></tr>' +
+                data.map(o =>
+                    '<tr>' +
+                        '<td>#' + o.id + '</td>' +
+                        '<td><span class="book-title">' + esc(o.bookName || '未知图书') + '</span></td>' +
+                        '<td>' + o.buyNum + ' 本</td>' +
+                        '<td class="price">¥' + o.totalMoney + '</td>' +
+                        '<td class="order-time">' + fmtTime(o.createTime) + '</td>' +
+                        '<td><button class="btn-rate" onclick="openRate(' + o.id + ',\'' +
+                            esc(o.bookName || '未知图书').replace(/'/g, "\\'") + '\')">写评价</button></td>' +
+                    '</tr>'
+                ).join('');
+        })
+        .catch(() => {
+            document.getElementById('pendingTable').innerHTML =
+                '<tr class="empty-row"><td colspan="6" style="color:#e74c3c;">加载失败</td></tr>';
+        });
+}
+
+// ---------- 我写过的评价 ----------
+function loadMyComments() {
+    fetch('/comment/my')
+        .then(r => r.json())
+        .then(res => {
+            const box = document.getElementById('myComments');
+            if (!res.success) {
+                box.innerHTML = '<div class="empty-row">' + esc(res.message) + '</div>';
+                return;
+            }
+            const data = res.data || [];
+            if (data.length === 0) {
+                box.innerHTML = '<div class="empty-row">还没有写过评价</div>';
+                return;
+            }
+            box.innerHTML = data.map(c =>
+                '<div class="comment-item">' +
+                    '<div class="comment-head">' +
+                        '<div>' +
+                            '<span class="book-title">' + esc(c.bookName || ('图书 #' + c.bookId)) + '</span>' +
+                            (c.isPinned == 1 ? '<span class="pin-tag">置顶</span>' : '') +
+                            ' <span class="stars">' + starsOf(c.rating) + '</span>' +
+                        '</div>' +
+                        '<div>' +
+                            '<span class="order-time" style="margin-right:12px;">' + fmtTime(c.createTime) + '</span>' +
+                            '<button class="btn-del" onclick="deleteComment(' + c.id + ')">删除</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="comment-body">' + esc(c.content || '（未填写文字评价）') + '</div>' +
+                '</div>'
+            ).join('');
+        })
+        .catch(() => {
+            document.getElementById('myComments').innerHTML = '<div class="empty-row" style="color:#e74c3c;">加载失败</div>';
+        });
+}
+
+// ---------- 评分弹窗 ----------
+function openRate(orderId, bookName) {
+    if (!orderId) {
+        showMsg('缺少订单号，无法评价', 'error');
+        return;
+    }
+    currentOrderId = orderId;
+    currentRating = 5;
+    document.getElementById('rateBookName').textContent = '《' + (bookName || '') + '》';
+    document.getElementById('rateContent').value = '';
+    paintStars(5);
+    document.getElementById('rateModal').classList.add('show');
+}
+
+function closeRate() {
+    document.getElementById('rateModal').classList.remove('show');
+    currentOrderId = null;
+}
+
+function paintStars(n) {
+    document.querySelectorAll('#starPicker span').forEach(s => {
+        s.classList.toggle('on', parseInt(s.dataset.v) <= n);
+    });
+}
+
+document.querySelectorAll('#starPicker span').forEach(s => {
+    s.addEventListener('click', () => {
+        currentRating = parseInt(s.dataset.v);
+        paintStars(currentRating);
+    });
+    s.addEventListener('mouseenter', () => paintStars(parseInt(s.dataset.v)));
+});
+document.getElementById('starPicker').addEventListener('mouseleave', () => paintStars(currentRating));
+
+function submitRate() {
+    if (!currentOrderId) return;
+    const body = new URLSearchParams();
+    body.append('orderId', currentOrderId);
+    body.append('rating', currentRating);
+    body.append('content', document.getElementById('rateContent').value);
+
+    fetch('/comment/create', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                showMsg(res.message, 'success');
+                closeRate();
+                loadPending();
+                loadMyComments();
+            } else {
+                showMsg(res.message, 'error');
+            }
+        })
+        .catch(() => showMsg('提交失败，请重试', 'error'));
+}
+
+function deleteComment(id) {
+    if (!confirm('确定删除这条评价吗？')) return;
+    const body = new URLSearchParams();
+    body.append('id', id);
+    fetch('/comment/delete', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(res => {
+            showMsg(res.message, res.success ? 'success' : 'error');
+            if (res.success) { loadMyComments(); loadPending(); }
+        })
+        .catch(() => showMsg('删除失败', 'error'));
+}
+
+loadPending();
+loadMyComments();
+</script>
+</body>
+</html>

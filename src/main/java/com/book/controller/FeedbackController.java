@@ -25,14 +25,8 @@ public class FeedbackController {
                                               HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         try {
-            System.out.println("=== 收到反馈请求 ===");
-            System.out.println("bookId: " + bookId);
-            System.out.println("bookName: " + bookName);
-            System.out.println("remark: " + remark);
-            
             User loginUser = (User) session.getAttribute("loginUser");
-            System.out.println("loginUser: " + loginUser);
-            
+
             if (loginUser == null) {
                 result.put("success", false);
                 result.put("message", "请先登录");
@@ -47,11 +41,8 @@ public class FeedbackController {
             feedback.setRemark(remark);
             feedback.setStatus(0);
 
-            System.out.println("准备插入反馈: " + feedback);
-            
             int res = feedbackService.createFeedback(feedback);
-            System.out.println("插入结果: " + res);
-            
+
             if (res > 0) {
                 result.put("success", true);
                 result.put("message", "反馈提交成功");
@@ -73,6 +64,11 @@ public class FeedbackController {
     public Map<String, Object> getMyFeedbacks(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            result.put("success", false);
+            result.put("message", "请先登录");
+            return result;
+        }
 
         List<Feedback> feedbacks = feedbackService.getUserFeedbacks(loginUser.getId());
         result.put("success", true);

@@ -3,10 +3,19 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.book.mapper.OrderMapper">
-    <insert id="insert">
+    <insert id="insert" parameterType="com.book.entity.Order" useGeneratedKeys="true" keyProperty="id">
         insert into orders(user_id,book_id,buy_num,total_money)
         values(#{userId},#{bookId},#{buyNum},#{totalMoney})
     </insert>
+
+    <!-- 当前用户尚未评价的订单（评论模块的「待评价」列表） -->
+    <select id="selectUncommentedOrders" resultType="com.book.entity.Order">
+        SELECT o.id,o.user_id,o.book_id,o.buy_num,o.total_money,o.create_time,b.book_name
+        FROM orders o LEFT JOIN book b ON o.book_id = b.id
+        WHERE o.user_id = #{userId}
+          AND NOT EXISTS (SELECT 1 FROM comment c WHERE c.order_id = o.id)
+        ORDER BY o.create_time DESC
+    </select>
     <select id="selectByUserId" resultType="com.book.entity.Order">
         SELECT o.id,o.user_id,o.book_id,o.buy_num,o.total_money,o.create_time,b.book_name
         FROM orders o LEFT JOIN book b ON o.book_id = b.id
@@ -16,5 +25,11 @@
         SELECT o.id,o.user_id,o.book_id,o.buy_num,o.total_money,o.create_time,b.book_name
         FROM orders o LEFT JOIN book b ON o.book_id = b.id
         ORDER BY o.create_time DESC
+    </select>
+
+    <select id="selectById" resultType="com.book.entity.Order">
+        SELECT o.id,o.user_id,o.book_id,o.buy_num,o.total_money,o.create_time,b.book_name
+        FROM orders o LEFT JOIN book b ON o.book_id = b.id
+        WHERE o.id = #{id}
     </select>
 </mapper>

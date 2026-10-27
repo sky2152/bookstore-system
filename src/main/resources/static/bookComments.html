@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>图书评论</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.nav-right a:hover { background: rgba(255,255,255,0.35); }
+.container { max-width: 860px; margin: 30px auto; padding: 0 20px; }
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+}
+.card h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+.summary { display: flex; align-items: center; gap: 24px; }
+.summary .score { font-size: 44px; font-weight: 700; color: #f39c12; line-height: 1; }
+.summary .meta { font-size: 14px; color: #888; }
+.stars { color: #f39c12; letter-spacing: 2px; font-size: 15px; }
+.stars .off { color: #ddd; }
+.comment-item {
+    padding: 18px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.comment-item:last-child { border-bottom: none; }
+.comment-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.comment-user { font-weight: 600; color: #444; font-size: 14px; }
+.comment-time { color: #aaa; font-size: 12px; }
+.comment-body { font-size: 14px; line-height: 1.7; color: #555; margin-top: 6px; word-break: break-word; }
+.pin-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-left: 8px;
+    background: #fdecea;
+    color: #c0392b;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.empty { text-align: center; padding: 50px 0; color: #999; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>💬 图书评论</h1>
+    <div class="nav-right">
+        <a href="/user/index">← 返回商城</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2 id="bookTitle">加载中...</h2>
+        <div class="summary">
+            <div class="score" id="avgScore">0.0</div>
+            <div>
+                <div class="stars" id="avgStars">☆☆☆☆☆</div>
+                <div class="meta" id="countText">暂无评价</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>全部评价</h2>
+        <div id="commentList"><div class="empty">加载中...</div></div>
+    </div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const bookId = params.get('bookId');
+
+function starsOf(n) {
+    n = Math.round(n || 0);
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+        html += i <= n ? '★' : '<span class="off">☆</span>';
+    }
+    return html;
+}
+
+function esc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function fmtTime(t) {
+    if (!t) return '';
+    return String(t).replace('T', ' ').substring(0, 19);
+}
+
+if (!bookId) {
+    document.getElementById('bookTitle').textContent = '缺少 bookId 参数';
+} else {
+    // 书名从图书列表里取
+    fetch('/api/book/list')
+        .then(r => r.json())
+        .then(list => {
+            const book = (list || []).find(b => b.id == bookId);
+            document.getElementById('bookTitle').textContent = book ? book.bookName : ('图书 #' + bookId);
+        })
+        .catch(() => {});
+
+    fetch('/comment/book?bookId=' + encodeURIComponent(bookId))
+        .then(r => r.json())
+        .then(res => {
+            const avg = parseFloat(res.avgRating || 0);
+            document.getElementById('avgScore').textContent = avg.toFixed(1);
+            document.getElementById('avgStars').innerHTML = starsOf(avg);
+            document.getElementById('countText').textContent =
+                (res.count > 0 ? res.count + ' 条评价' : '暂无评价');
+
+            const data = res.data || [];
+            const box = document.getElementById('commentList');
+            if (data.length === 0) {
+                box.innerHTML = '<div class="empty">这本书还没有人评价，买过之后可以在「我的评价」里写下第一条～</div>';
+                return;
+            }
+            box.innerHTML = data.map(c =>
+                '<div class="comment-item">' +
+                    '<div class="comment-head">' +
+                        '<div>' +
+                            '<span class="comment-user">' + esc(c.username || '匿名用户') + '</span>' +
+                            (c.isPinned == 1 ? '<span class="pin-tag">置顶</span>' : '') +
+                        '</div>' +
+                        '<span class="comment-time">' + fmtTime(c.createTime) + '</span>' +
+                    '</div>' +
+                    '<div class="stars">' + starsOf(c.rating) + '</div>' +
+                    '<div class="comment-body">' + esc(c.content || '（未填写文字评价）') + '</div>' +
+                '</div>'
+            ).join('');
+        })
+        .catch(() => {
+            document.getElementById('commentList').innerHTML =
+                '<div class="empty" style="color:#e74c3c;">加载失败</div>';
+        });
+}
+</script>
+</body>
+</html>

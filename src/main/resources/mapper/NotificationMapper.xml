@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.book.mapper.NotificationMapper">
+    <insert id="insert" parameterType="com.book.entity.Notification" useGeneratedKeys="true" keyProperty="id">
+        insert into notification(user_id, type, title, content, related_id, is_read, create_time)
+        values(#{userId}, #{type}, #{title}, #{content}, #{relatedId}, 0, now())
+    </insert>
+
+    <select id="selectByUserId" resultType="com.book.entity.Notification">
+        select id, user_id, type, title, content, related_id, is_read, create_time
+        from notification
+        where user_id = #{userId}
+        order by is_read asc, create_time desc
+    </select>
+
+    <select id="countUnread" resultType="int">
+        select count(*) from notification where user_id = #{userId} and is_read = 0
+    </select>
+
+    <update id="markRead">
+        update notification set is_read = 1
+        where id = #{id} and user_id = #{userId}
+    </update>
+
+    <update id="markAllRead">
+        update notification set is_read = 1
+        where user_id = #{userId} and is_read = 0
+    </update>
+
+    <delete id="deleteById">
+        delete from notification where id = #{id} and user_id = #{userId}
+    </delete>
+</mapper>

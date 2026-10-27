@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>评论管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right { display: flex; gap: 10px; align-items: center; }
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.nav-right a:hover { background: rgba(255,255,255,0.35); }
+.container { max-width: 1180px; margin: 30px auto; padding: 0 20px; }
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+}
+.card h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+.card h2 .title-wrap { display: flex; align-items: center; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th {
+    background: #f8f9fa;
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 2px solid #e5e7eb;
+}
+td { padding: 14px 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: top; }
+tr:hover { background: #fafbfc; }
+.content-cell { max-width: 320px; line-height: 1.6; color: #555; word-break: break-word; }
+.order-time { color: #999; font-size: 13px; }
+.stars { color: #f39c12; letter-spacing: 1px; }
+.stars .off { color: #ddd; }
+.pin-tag {
+    display: inline-block; padding: 2px 8px;
+    background: #fdecea; color: #c0392b; border-radius: 10px; font-size: 12px;
+}
+.normal-tag {
+    display: inline-block; padding: 2px 8px;
+    background: #eef1f5; color: #7f8c8d; border-radius: 10px; font-size: 12px;
+}
+.btn {
+    border: none; padding: 6px 14px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; margin-right: 6px; transition: all 0.2s;
+}
+.btn-pin { background: #fff; color: #667eea; border: 1px solid #c7d2fe; }
+.btn-pin:hover { background: #eef2ff; }
+.btn-unpin { background: #fff; color: #7f8c8d; border: 1px solid #dfe3e8; }
+.btn-unpin:hover { background: #f4f6f8; }
+.btn-del { background: #fff; color: #e74c3c; border: 1px solid #f5c6cb; }
+.btn-del:hover { background: #fdecea; }
+.empty-row td { text-align: center; padding: 50px 12px; color: #999; }
+.msg {
+    position: fixed; top: 24px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 12px 26px; border-radius: 10px; color: white;
+    font-size: 14px; opacity: 0; transition: all 0.3s; z-index: 200; pointer-events: none;
+}
+.msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.msg.success { background: #27ae60; }
+.msg.error { background: #e74c3c; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>💬 评论管理</h1>
+    <div class="nav-right">
+        <a href="/bookList.html">图书管理</a>
+        <a href="/admin-feedback.html">反馈处理</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>
+            <span class="title-wrap">全部评论</span>
+            <span id="summary" style="font-size:14px;font-weight:400;color:#888;"></span>
+        </h2>
+        <table id="commentTable">
+            <tr>
+                <th>ID</th><th>图书</th><th>用户</th><th>评分</th>
+                <th>内容</th><th>时间</th><th>状态</th><th>操作</th>
+            </tr>
+            <tr class="empty-row"><td colspan="8">加载中...</td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="msg" id="msgBox"></div>
+
+<script>
+function esc(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+function starsOf(n) {
+    n = Math.round(n || 0);
+    let html = '';
+    for (let i = 1; i <= 5; i++) html += i <= n ? '★' : '<span class="off">☆</span>';
+    return html;
+}
+function fmtTime(t) {
+    if (!t) return '';
+    return String(t).replace('T', ' ').substring(0, 19);
+}
+function showMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg show ' + (type || 'success');
+    setTimeout(() => { box.className = 'msg ' + (type || 'success'); }, 2600);
+}
+
+const HEADER = '<tr><th>ID</th><th>图书</th><th>用户</th><th>评分</th>' +
+               '<th>内容</th><th>时间</th><th>状态</th><th>操作</th></tr>';
+
+function loadComments() {
+    fetch('/comment/all')
+        .then(r => r.json())
+        .then(res => {
+            const table = document.getElementById('commentTable');
+            if (!res.success) {
+                table.innerHTML = HEADER +
+                    '<tr class="empty-row"><td colspan="8" style="color:#e74c3c;">' + esc(res.message) + '</td></tr>';
+                document.getElementById('summary').textContent = '';
+                return;
+            }
+            const data = res.data || [];
+            const pinned = data.filter(c => c.isPinned == 1).length;
+            document.getElementById('summary').textContent = '共 ' + data.length + ' 条，置顶 ' + pinned + ' 条';
+
+            if (data.length === 0) {
+                table.innerHTML = HEADER + '<tr class="empty-row"><td colspan="8">还没有任何评论</td></tr>';
+                return;
+            }
+            table.innerHTML = HEADER + data.map(c =>
+                '<tr>' +
+                    '<td>#' + c.id + '</td>' +
+                    '<td>' + esc(c.bookName || ('图书 #' + c.bookId)) + '</td>' +
+                    '<td>' + esc(c.username || ('用户 #' + c.userId)) + '</td>' +
+                    '<td><span class="stars">' + starsOf(c.rating) + '</span></td>' +
+                    '<td class="content-cell">' + esc(c.content || '（未填写文字评价）') + '</td>' +
+                    '<td class="order-time">' + fmtTime(c.createTime) + '</td>' +
+                    '<td>' + (c.isPinned == 1 ? '<span class="pin-tag">已置顶</span>' : '<span class="normal-tag">普通</span>') + '</td>' +
+                    '<td>' +
+                        (c.isPinned == 1
+                            ? '<button class="btn btn-unpin" onclick="setPin(' + c.id + ',0)">取消置顶</button>'
+                            : '<button class="btn btn-pin" onclick="setPin(' + c.id + ',1)">置顶</button>') +
+                        '<button class="btn btn-del" onclick="del(' + c.id + ')">删除</button>' +
+                    '</td>' +
+                '</tr>'
+            ).join('');
+        })
+        .catch(() => {
+            document.getElementById('commentTable').innerHTML =
+                HEADER + '<tr class="empty-row"><td colspan="8" style="color:#e74c3c;">加载失败</td></tr>';
+        });
+}
+
+function setPin(id, isPinned) {
+    const body = new URLSearchParams();
+    body.append('id', id);
+    body.append('isPinned', isPinned);
+    fetch('/comment/pin', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(res => {
+            showMsg(res.message, res.success ? 'success' : 'error');
+            if (res.success) loadComments();
+        })
+        .catch(() => showMsg('操作失败', 'error'));
+}
+
+function del(id) {
+    if (!confirm('确定删除这条评论吗？删除后不可恢复。')) return;
+    const body = new URLSearchParams();
+    body.append('id', id);
+    fetch('/comment/delete', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(res => {
+            showMsg(res.message, res.success ? 'success' : 'error');
+            if (res.success) loadComments();
+        })
+        .catch(() => showMsg('删除失败', 'error'));
+}
+
+loadComments();
+</script>
+</body>
+</html>
