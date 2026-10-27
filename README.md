@@ -61,7 +61,8 @@ book/
 │   ├── mapper/                       # MyBatis 接口
 │   └── entity/                       # 7 个实体
 ├── src/main/resources/
-│   ├── application.properties
+│   ├── application.properties        # 公共配置（不含账号密码）
+│   ├── application-local.properties.example  # 本地配置模板
 │   ├── schema.sql                    # 建表 + 种子数据
 │   ├── mapper/*.xml                  # 7 个 SQL 映射文件
 │   └── static/                       # 14 个页面
@@ -224,27 +225,41 @@ mysql -u root -p < src/main/resources/schema.sql
 
 > ⚠️ `schema.sql` 开头有 `DROP TABLE IF EXISTS`，**会清空同名表**。只用于初始化本地开发库。
 
-### 2. 改数据库连接
+### 2. 配置数据库账号
 
-编辑 `src/main/resources/application.properties`：
+数据库密码**不写进仓库**。二选一：
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/book_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-spring.datasource.username=root
-spring.datasource.password=你的密码
+**方式一（推荐）：本地配置文件**
+
+```bash
+cp src/main/resources/application-local.properties.example \
+   src/main/resources/application-local.properties
 ```
 
-> Spring Boot 默认只对内嵌数据库执行 `schema.sql`，对 MySQL 不会自动执行，所以建表必须手动跑上面的命令。
+然后编辑 `application-local.properties`，填入自己的账号密码。该文件已被 `.gitignore` 忽略。
+
+**方式二：环境变量**
+
+```bash
+export DB_USERNAME=root
+export DB_PASSWORD=你的密码
+```
+
+> `application.properties` 里的连接地址是 `jdbc:mysql://localhost:3306/book_db`，如果库名或端口不同，直接改那一行即可。
+>
+> Spring Boot 默认只对内嵌数据库执行 `schema.sql`，对 MySQL 不会自动执行，所以建表必须手动跑第 1 步的命令。
 
 ### 3. 启动
 
 ```bash
 # Linux / macOS / Git Bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # Windows CMD
-mvnw.cmd spring-boot:run
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
 ```
+
+> 如果用的是方式二（环境变量）而不是 local profile，可以去掉 `-Dspring-boot.run.profiles=local`。
 
 启动后访问 <http://localhost:8080/login.html>
 
@@ -262,7 +277,7 @@ mvnw.cmd spring-boot:run
 写在这里是为了避免面试时被问住，也说明自己清楚边界：
 
 1. **会话是单机内存 session**，多实例部署需要换成 Spring Session + Redis。
-2. **没有统一的登录拦截器**，页面级鉴权靠各控制器内判断；`/feedback/all`、`/feedback/handle` 目前尚未做管理员校验。
+2. **鉴权逻辑分散在各控制器里**，没有统一的登录拦截器。管理端接口（图书增删改、分类、反馈、评论）都已逐个做了 `role == 1` 校验，但静态页面本身没有访问控制——直接输入 `/bookList.html` 能打开页面，只是页面里的接口调用会被拒绝。后续应改为 `HandlerInterceptor` 统一收敛。
 3. **评论、反馈列表未分页**，数据量大时需要补分页。
 4. **推荐算法是内存计算**，每次请求全量查订单，数据量大时应改为离线计算 + 缓存。
 5. 缺少单元测试与接口自动化测试。

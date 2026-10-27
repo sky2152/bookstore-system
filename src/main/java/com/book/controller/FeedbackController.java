@@ -78,8 +78,13 @@ public class FeedbackController {
 
     @GetMapping("/all")
     @ResponseBody
-    public Map<String, Object> getAllFeedbacks() {
+    public Map<String, Object> getAllFeedbacks(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        if (!isAdmin(session)) {
+            result.put("success", false);
+            result.put("message", "需要管理员权限");
+            return result;
+        }
 
         List<Feedback> feedbacks = feedbackService.getAllFeedbacks();
         result.put("success", true);
@@ -90,8 +95,14 @@ public class FeedbackController {
     @PostMapping("/handle")
     @ResponseBody
     public Map<String, Object> handleFeedback(@RequestParam Integer id,
-                                              @RequestParam String handleRemark) {
+                                              @RequestParam(required = false) String handleRemark,
+                                              HttpSession session) {
         Map<String, Object> result = new HashMap<>();
+        if (!isAdmin(session)) {
+            result.put("success", false);
+            result.put("message", "需要管理员权限");
+            return result;
+        }
 
         int res = feedbackService.handleFeedback(id, handleRemark);
         if (res > 0) {
@@ -112,5 +123,11 @@ public class FeedbackController {
     @GetMapping("/admin/page")
     public String toAdminFeedbackPage() {
         return "redirect:/admin-feedback.html";
+    }
+
+    /** 管理员判断：role == 1。未登录一律视为非管理员。 */
+    private static boolean isAdmin(HttpSession session) {
+        User user = (User) session.getAttribute("loginUser");
+        return user != null && user.getRole() != null && user.getRole() == 1;
     }
 }

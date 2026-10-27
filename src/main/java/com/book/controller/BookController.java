@@ -2,8 +2,10 @@ package com.book.controller;
 
 import com.book.entity.Book;
 import com.book.entity.Category;
+import com.book.entity.User;
 import com.book.service.BookService;
 import com.book.service.CategoryService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +32,10 @@ public class BookController {
     }
 
     @PostMapping("/add")
-    public String addBook(Book book){
+    public String addBook(Book book, HttpSession session){
+        if(!isAdmin(session)){
+            return "redirect:/login.html";
+        }
         int result = bookService.add(book);
         if(result > 0){
             return "redirect:/bookList.html?msg=" + java.net.URLEncoder.encode("新增图书成功", java.nio.charset.StandardCharsets.UTF_8);
@@ -39,7 +44,10 @@ public class BookController {
     }
 
     @GetMapping("/delete")
-    public String deleteBook(Integer id){
+    public String deleteBook(Integer id, HttpSession session){
+        if(!isAdmin(session)){
+            return "redirect:/login.html";
+        }
         int result = bookService.delete(id);
         if(result > 0){
             return "redirect:/bookList.html?msg=" + java.net.URLEncoder.encode("删除成功", java.nio.charset.StandardCharsets.UTF_8);
@@ -48,7 +56,10 @@ public class BookController {
     }
 
     @PostMapping("/edit")
-    public String editBook(Book book){
+    public String editBook(Book book, HttpSession session){
+        if(!isAdmin(session)){
+            return "redirect:/login.html";
+        }
         int result = bookService.edit(book);
         if(result > 0){
             return "redirect:/bookList.html?msg=" + java.net.URLEncoder.encode("修改成功", java.nio.charset.StandardCharsets.UTF_8);
@@ -64,8 +75,13 @@ public class BookController {
 
     @ResponseBody
     @PostMapping("/batch")
-    public Map<String, Object> batchAdd(String batchText){
+    public Map<String, Object> batchAdd(String batchText, HttpSession session){
         Map<String, Object> result = new HashMap<>();
+        if(!isAdmin(session)){
+            result.put("success", false);
+            result.put("message", "需要管理员权限");
+            return result;
+        }
 
         List<Category> categories = categoryService.selectAll();
         Map<String, Integer> categoryMap = new HashMap<>();
@@ -105,5 +121,11 @@ public class BookController {
         result.put("successCount", success);
         result.put("failCount", fail);
         return result;
+    }
+
+    /** 管理员判断：role == 1。未登录一律视为非管理员。 */
+    private static boolean isAdmin(HttpSession session) {
+        User user = (User) session.getAttribute("loginUser");
+        return user != null && user.getRole() != null && user.getRole() == 1;
     }
 }
