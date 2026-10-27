@@ -64,7 +64,7 @@ book/
 │   ├── application.properties
 │   ├── schema.sql                    # 建表 + 种子数据
 │   ├── mapper/*.xml                  # 7 个 SQL 映射文件
-│   └── static/                       # 16 个页面
+│   └── static/                       # 14 个页面
 ├── uml-diagrams/                     # 用例图、类图、ER 图、时序图、活动图
 ├── bookstore-demo/                   # 单页项目演示（架构与流程展示）
 └── pom.xml
@@ -264,9 +264,8 @@ mvnw.cmd spring-boot:run
 1. **会话是单机内存 session**，多实例部署需要换成 Spring Session + Redis。
 2. **没有统一的登录拦截器**，页面级鉴权靠各控制器内判断；`/feedback/all`、`/feedback/handle` 目前尚未做管理员校验。
 3. **评论、反馈列表未分页**，数据量大时需要补分页。
-4. **`static/` 下有两组重复页面**：`userFeedback.html`、`adminFeedback.html` 是早期版本，已无任何入口引用（实际在用的是 `feedback.html` 与 `admin-feedback.html`），待清理。
-5. **推荐算法是内存计算**，每次请求全量查订单，数据量大时应改为离线计算 + 缓存。
-6. 缺少单元测试与接口自动化测试。
+4. **推荐算法是内存计算**，每次请求全量查订单，数据量大时应改为离线计算 + 缓存。
+5. 缺少单元测试与接口自动化测试。
 
 ---
 
