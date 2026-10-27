@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.mapper.OrderMapper">
+    <insert id="insert">
+        insert into orders(user_id,book_id,buy_num,total_money)
+        values(#{userId},#{bookId},#{buyNum},#{totalMoney})
+    </insert>
+    <select id="selectByUserId" resultType="com.book.entity.Order">
+        SELECT o.id,o.user_id,o.book_id,o.buy_num,o.total_money,o.create_time,b.book_name
+        FROM orders o LEFT JOIN book b ON o.book_id = b.id
+        WHERE o.user_id = #{userId} ORDER BY o.create_time DESC
+    </select>
+    <select id="selectAll" resultType="com.book.entity.Order">
+        SELECT o.id,o.user_id,o.book_id,o.buy_num,o.total_money,o.create_time,b.book_name
+        FROM orders o LEFT JOIN book b ON o.book_id = b.id
+        ORDER BY o.create_time DESC
+    </select>
+</mapper>

@@ -1,0 +1,44 @@
+@startuml 热门推荐时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 用户
+participant "推荐界面" as UI
+participant "RecommendController" as Controller
+participant "RecommendService" as Service
+database "BookMapper" as BookMapper
+database "OrderMapper" as OrderMapper
+
+用户 -> UI: 点击热门推荐
+activate UI
+UI -> Controller: GET /recommend/hot
+activate Controller
+Controller -> Service: getHotBooks(10)
+activate Service
+
+Service -> OrderMapper: selectAll()
+activate OrderMapper
+OrderMapper --> Service: 所有订单列表
+deactivate OrderMapper
+
+Service -> Service: 统计每本书销量
+Service -> BookMapper: selectAll()
+activate BookMapper
+BookMapper --> Service: 所有图书列表
+deactivate BookMapper
+
+Service -> Service: 按销量排序
+Service -> Service: 取前10本
+Service --> Controller: 返回推荐列表
+deactivate Service
+
+Controller --> UI: 返回JSON数据
+UI -> UI: 渲染推荐列表
+UI --> 用户: 显示推荐图书
+
+deactivate Controller
+deactivate UI
+
+@enduml

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UML图使用说明</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            line-height: 1.8;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #333;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 25px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .file-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .file-item h4 {
+            margin: 0 0 8px 0;
+        }
+        .file-item p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: "Courier New", monospace;
+        }
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .tip {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 UML图使用说明</h1>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://www.plantuml.com/plantuml/" target="_blank" class="btn">🌐 在线渲染PlantUML</a>
+            <a href="https://app.diagrams.net/" target="_blank" class="btn">✏️ Draw.io画图工具</a>
+        </div>
+
+        <h2>📖 方法一：使用PlantUML在线渲染（推荐！）</h2>
+        <div class="step">
+            <span class="step-number">1</span>
+            打开 <a href="https://www.plantuml.com/plantuml/" target="_blank">PlantUML在线网站</a>
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            打开任意一个 <code>.puml</code> 文件，复制全部内容
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            粘贴到PlantUML网站的输入框中
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            点击页面下方的 PNG 或 SVG 按钮导出图片
+        </div>
+        <div class="step">
+            <span class="step-number">5</span>
+            保存图片到电脑
+        </div>
+
+        <h2>📖 方法二：使用Draw.io手动绘制</h2>
+        <div class="step">
+            <span class="step-number">1</span>
+            打开 <a href="https://app.diagrams.net/" target="_blank">Draw.io</a>
+        </div>
+        <div class="step">
+            <span class="step-number">2</span>
+            选择保存位置（推荐保存到设备）
+        </div>
+        <div class="step">
+            <span class="step-number">3</span>
+            左侧菜单选择 UML → 对应图类型
+        </div>
+        <div class="step">
+            <span class="step-number">4</span>
+            按照示例图的样子绘制
+        </div>
+        <div class="step">
+            <span class="step-number">5</span>
+            File → Export as → PNG 导出
+        </div>
+
+        <h2>📁 已创建的UML文件列表</h2>
+        <div class="file-list">
+            <div class="file-item">
+                <h4>01_用例图.puml</h4>
+                <p>系统整体功能用例图</p>
+            </div>
+            <div class="file-item">
+                <h4>02_类图.puml</h4>
+                <p>实体类及关系图</p>
+            </div>
+            <div class="file-item">
+                <h4>03_时序图_用户登录.puml</h4>
+                <p>用户登录流程时序图</p>
+            </div>
+            <div class="file-item">
+                <h4>04_时序图_购买图书.puml</h4>
+                <p>购买图书流程时序图</p>
+            </div>
+            <div class="file-item">
+                <h4>05_时序图_热门推荐.puml</h4>
+                <p>热门推荐流程时序图</p>
+            </div>
+            <div class="file-item">
+                <h4>06_时序图_历史推荐.puml</h4>
+                <p>基于历史推荐时序图</p>
+            </div>
+            <div class="file-item">
+                <h4>07_时序图_协同过滤.puml</h4>
+                <p>协同过滤推荐时序图</p>
+            </div>
+            <div class="file-item">
+                <h4>08_活动图_购买流程.puml</h4>
+                <p>购买图书活动流程图</p>
+            </div>
+            <div class="file-item">
+                <h4>09_活动图_推荐算法.puml</h4>
+                <p>推荐算法活动流程图</p>
+            </div>
+            <div class="file-item">
+                <h4>10_ER图.puml</h4>
+                <p>数据库实体关系图</p>
+            </div>
+        </div>
+
+        <div class="tip">
+            <strong>💡 提示：</strong> 你还需要补充以下时序图来满足实训要求（至少9张）：
+            <ul>
+                <li>用户注册时序图</li>
+                <li>查看订单时序图</li>
+                <li>余额充值时序图</li>
+                <li>管理员添加图书时序图</li>
+            </ul>
+        </div>
+
+        <h2>🎯 快速操作步骤</h2>
+        <ol>
+            <li>点击上方按钮进入PlantUML网站</li>
+            <li>逐个打开本目录下的 <code>.puml</code> 文件，复制内容</li>
+            <li>粘贴到PlantUML，导出PNG</li>
+            <li>把所有PNG图片整理到文件夹，命名为 <code>学号_姓名_图</code></li>
+            <li>插入到实训报告中</li>
+        </ol>
+
+        <h2>📋 需要导出的图片清单</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr style="background: #667eea; color: white;">
+                <th style="padding: 12px; border: 1px solid #ddd;">序号</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">图类型</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">文件名</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">状态</th>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #ddd;">1</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">用例图</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">01_用例图.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">2</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">类图</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">02_类图.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #ddd;">3</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">时序图-登录</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">03_时序图_用户登录.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">4</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">时序图-购买</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">04_时序图_购买图书.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #ddd;">5</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">时序图-热门推荐</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">05_时序图_热门推荐.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">6</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">时序图-历史推荐</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">06_时序图_历史推荐.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #ddd;">7</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">时序图-协同过滤</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">07_时序图_协同过滤.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">8</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">活动图-购买</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">08_活动图_购买流程.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr style="background: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #ddd;">9</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">活动图-推荐</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">09_活动图_推荐算法.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">10</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">ER图</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">10_ER图.puml</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">☐ 已导出</td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee;">
+            <p style="color: #666;">祝你实训顺利！🎉</p>
+        </div>
+    </div>
+</body>
+</html>

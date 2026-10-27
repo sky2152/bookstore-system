@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.book.mapper.FeedbackMapper">
+    <insert id="insert" parameterType="com.book.entity.Feedback" useGeneratedKeys="true" keyProperty="id">
+        insert into feedback(user_id, book_id, book_name, username, remark, status, create_time)
+        values(#{userId}, #{bookId}, #{bookName}, #{username}, #{remark}, 0, now())
+    </insert>
+
+    <select id="selectAll" resultType="com.book.entity.Feedback">
+        select id, user_id, book_id, book_name, username, remark, status, create_time, handle_time, handle_remark
+        from feedback order by create_time desc
+    </select>
+
+    <select id="selectByUserId" resultType="com.book.entity.Feedback">
+        select id, user_id, book_id, book_name, username, remark, status, create_time, handle_time, handle_remark
+        from feedback where user_id = #{userId} order by create_time desc
+    </select>
+
+    <select id="selectById" resultType="com.book.entity.Feedback">
+        select id, user_id, book_id, book_name, username, remark, status, create_time, handle_time, handle_remark
+        from feedback where id = #{id}
+    </select>
+
+    <update id="updateStatus">
+        update feedback set status = #{status}, handle_time = now(), handle_remark = #{handleRemark}
+        where id = #{id}
+    </update>
+</mapper>

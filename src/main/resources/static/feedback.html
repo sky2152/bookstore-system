@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>我的缺货反馈</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.nav-right a:hover { background: rgba(255,255,255,0.35); }
+.container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+}
+.card h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th {
+    background: #f8f9fa;
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 2px solid #e5e7eb;
+}
+td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+tr:hover { background: #fafbfc; }
+.status-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.status-pending { background: #fff3cd; color: #856404; }
+.status-handled { background: #d4edda; color: #155724; }
+.empty-row td { text-align: center; padding: 60px 12px; color: #999; }
+.book-title { font-weight: 600; color: #333; }
+.remark-text { color: #666; max-width: 300px; }
+.handle-remark { background: #f8f9fa; padding: 8px 12px; border-radius: 8px; color: #555; margin-top: 5px; }
+.time-text { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>📋 我的缺货反馈</h1>
+    <div class="nav-right">
+        <a href="/user/index">← 返回商城</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>反馈列表</h2>
+        <table>
+            <tr>
+                <th>图书名称</th>
+                <th>反馈内容</th>
+                <th>提交时间</th>
+                <th>状态</th>
+                <th>管理员回复</th>
+            </tr>
+            <tr class="empty-row"><td colspan="5">加载中...</td></tr>
+        </table>
+    </div>
+</div>
+
+<script>
+fetch('/feedback/my')
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) {
+            document.querySelector('table').innerHTML =
+                '<tr class="empty-row"><td colspan="5" style="color:#e74c3c;">' + data.message + '</td></tr>';
+            return;
+        }
+        if (!data.data || data.data.length === 0) {
+            document.querySelector('table').innerHTML =
+                '<tr><th>图书名称</th><th>反馈内容</th><th>提交时间</th><th>状态</th><th>管理员回复</th></tr>' +
+                '<tr class="empty-row"><td colspan="5">暂无反馈记录</td></tr>';
+            return;
+        }
+
+        let html = '<tr><th>图书名称</th><th>反馈内容</th><th>提交时间</th><th>状态</th><th>管理员回复</th></tr>';
+        data.data.forEach(fb => {
+            let statusClass = fb.status === 0 ? 'status-pending' : 'status-handled';
+            let statusText = fb.status === 0 ? '待处理' : '已处理';
+            let time = fb.createTime ? fb.createTime.replace('T', ' ').substring(0, 19) : '';
+            let handleTime = fb.handleTime ? fb.handleTime.replace('T', ' ').substring(0, 19) : '';
+            let handleRemark = fb.handleRemark ? '<div class="handle-remark">' + fb.handleRemark + '<div class="time-text" style="margin-top:5px;">' + handleTime + '</div></div>' : '-';
+            
+            html += '<tr>' +
+                '<td><span class="book-title">' + fb.bookName + '</span></td>' +
+                '<td class="remark-text">' + (fb.remark || '-') + '</td>' +
+                '<td class="time-text">' + time + '</td>' +
+                '<td><span class="status-tag ' + statusClass + '">' + statusText + '</span></td>' +
+                '<td>' + handleRemark + '</td>' +
+                '</tr>';
+        });
+        document.querySelector('table').innerHTML = html;
+    })
+    .catch(err => {
+        document.querySelector('table').innerHTML =
+            '<tr class="empty-row"><td colspan="5" style="color:#e74c3c;">加载失败</td></tr>';
+    });
+</script>
+</body>
+</html>

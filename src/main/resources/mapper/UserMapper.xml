@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.mapper.UserMapper">
+    <select id="login" resultType="com.book.entity.User">
+        select id,username,password,role,balance from user where username=#{username} and password=#{password}
+    </select>
+    <select id="selectByUsername" resultType="com.book.entity.User">
+        select id from user where username=#{username}
+    </select>
+    <insert id="insert">
+        insert into user(username,password,role,balance) values(#{username},#{password},2,0)
+    </insert>
+    <update id="recharge">
+        update user set balance = balance + #{money} where id = #{id}
+    </update>
+    <select id="selectById" resultType="com.book.entity.User">
+        select id, username, password, role, balance from user where id = #{id}
+    </select>
+    <update id="deductBalance">
+        update user set balance = balance - #{money} where id = #{id} and balance >= #{money}
+    </update>
+</mapper>

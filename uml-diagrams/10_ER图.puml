@@ -1,0 +1,44 @@
+@startuml 数据库ER图
+
+skinparam linetype ortho
+
+entity "用户 (user)" as user {
+  *id : Integer <<PK>>
+  --
+  username : String(50)
+  password : String(20)
+  role : Integer
+  balance : BigDecimal
+}
+
+entity "分类 (category)" as category {
+  *id : Integer <<PK>>
+  --
+  category_name : String(50)
+}
+
+entity "图书 (book)" as book {
+  *id : Integer <<PK>>
+  --
+  book_name : String(100)
+  author : String(50)
+  price : BigDecimal
+  stock : Integer
+  category_id : Integer <<FK>>
+}
+
+entity "订单 (orders)" as orders {
+  *id : Integer <<PK>>
+  --
+  user_id : Integer <<FK>>
+  book_id : Integer <<FK>>
+  buy_num : Integer
+  total_money : BigDecimal
+  create_time : Date
+}
+
+user ||..o{ orders
+category ||..o{ book
+book ||..o{ orders
+
+@enduml

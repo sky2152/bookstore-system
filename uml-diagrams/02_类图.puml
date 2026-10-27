@@ -1,0 +1,112 @@
+@startuml 类图
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class User {
+    - id: Integer
+    - username: String
+    - password: String
+    - role: Integer
+    - balance: BigDecimal
+    + getId(): Integer
+    + setId(id: Integer): void
+    + getUsername(): String
+    + setUsername(username: String): void
+    + getPassword(): String
+    + setPassword(password: String): void
+    + getRole(): Integer
+    + setRole(role: Integer): void
+    + getBalance(): BigDecimal
+    + setBalance(balance: BigDecimal): void
+    + login(): boolean
+    + register(): boolean
+    + recharge(amount: BigDecimal): void
+    + buyBook(bookId: Integer, num: Integer): boolean
+    + viewOrders(): List<Order>
+}
+
+class Book {
+    - id: Integer
+    - bookName: String
+    - author: String
+    - price: BigDecimal
+    - stock: Integer
+    - categoryId: Integer
+    - categoryName: String
+    - sales: Integer
+    + getId(): Integer
+    + setId(id: Integer): void
+    + getBookName(): String
+    + setBookName(bookName: String): void
+    + getAuthor(): String
+    + setAuthor(author: String): void
+    + getPrice(): BigDecimal
+    + setPrice(price: BigDecimal): void
+    + getStock(): Integer
+    + setStock(stock: Integer): void
+    + getCategoryId(): Integer
+    + setCategoryId(categoryId: Integer): void
+    + getCategoryName(): String
+    + setCategoryName(categoryName: String): void
+    + getSales(): Integer
+    + setSales(sales: Integer): void
+    + getInfo(): String
+    + updateStock(num: Integer): boolean
+}
+
+class Order {
+    - id: Integer
+    - userId: Integer
+    - bookId: Integer
+    - buyNum: Integer
+    - totalMoney: BigDecimal
+    - createTime: Date
+    - bookName: String
+    + getId(): Integer
+    + setId(id: Integer): void
+    + getUserId(): Integer
+    + setUserId(userId: Integer): void
+    + getBookId(): Integer
+    + setBookId(bookId: Integer): void
+    + getBuyNum(): Integer
+    + setBuyNum(buyNum: Integer): void
+    + getTotalMoney(): BigDecimal
+    + setTotalMoney(totalMoney: BigDecimal): void
+    + getCreateTime(): Date
+    + setCreateTime(createTime: Date): void
+    + getBookName(): String
+    + setBookName(bookName: String): void
+    + create(): boolean
+    + cancel(): boolean
+}
+
+class Category {
+    - id: Integer
+    - categoryName: String
+    + getId(): Integer
+    + setId(id: Integer): void
+    + getCategoryName(): String
+    + setCategoryName(categoryName: String): void
+    + addBook(book: Book): boolean
+    + removeBook(bookId: Integer): boolean
+}
+
+class RecommendService {
+    - bookMapper: BookMapper
+    - orderMapper: OrderMapper
+    + recommendByUserHistory(userId: Integer, limit: Integer): List<Book>
+    + recommendByCollaborative(userId: Integer, limit: Integer): List<Book>
+    + getHotBooks(limit: Integer): List<Book>
+    + getHybridRecommendations(userId: Integer, limit: Integer): List<Book>
+    - calculateJaccard(set1: Set, set2: Set): double
+    - buildUserBookMap(orders: List): Map
+}
+
+User "1" -- "n" Order
+Book "1" -- "n" Order
+Category "1" -- "n" Book
+RecommendService ..> BookMapper : 使用
+RecommendService ..> OrderMapper : 使用
+
+@enduml

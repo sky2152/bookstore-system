@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.mapper.CategoryMapper">
+    <select id="selectAll" resultType="com.book.entity.Category">
+        select id,category_name from category
+    </select>
+    <select id="selectById" resultType="com.book.entity.Category">
+        select id,category_name from category where id=#{id}
+    </select>
+    <insert id="insert">insert into category(category_name) values(#{categoryName})</insert>
+    <update id="update">update category set category_name=#{categoryName} where id=#{id}</update>
+    <delete id="deleteById">delete from category where id=#{id}</delete>
+    <select id="countBooksByCategoryId" resultType="int">
+        select count(*) from book where category_id=#{id}
+    </select>
+</mapper>

@@ -1,0 +1,66 @@
+
+@startuml 管理员编辑图书时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 管理员
+participant "图书管理界面" as UI
+participant "BookController" as Controller
+participant "BookService" as Service
+database "BookMapper" as Mapper
+database "数据库" as DB
+
+管理员 -&gt; UI: 点击编辑图书
+activate UI
+UI -&gt; Controller: GET /book/{id}
+activate Controller
+Controller -&gt; Service: selectById(id)
+activate Service
+Service -&gt; Mapper: selectById(id)
+activate Mapper
+Mapper -&gt; DB: SELECT * FROM book WHERE id=?
+activate DB
+DB --&gt; Mapper: 返回图书信息
+deactivate DB
+Mapper --&gt; Service: Book对象
+deactivate Mapper
+Service --&gt; Controller: 返回图书信息
+deactivate Service
+
+Controller --&gt; UI: 返回图书信息
+deactivate Controller
+UI -&gt; UI: 回显到表单
+UI -&gt; 管理员: 显示编辑表单
+
+管理员 -&gt; UI: 修改信息并提交
+UI -&gt; Controller: POST /book/edit
+activate Controller
+Controller -&gt; Service: edit(Book)
+activate Service
+Service -&gt; Mapper: update(Book)
+activate Mapper
+Mapper -&gt; DB: UPDATE book SET ...
+activate DB
+DB --&gt; Mapper: 返回更新结果
+deactivate DB
+Mapper --&gt; Service: 返回影响行数
+deactivate Mapper
+
+alt 编辑成功
+    Service --&gt; Controller: 返回成功
+    Controller --&gt; UI: 重定向到列表页
+    UI -&gt; UI: 刷新列表
+    UI --&gt; 管理员: 显示编辑成功
+else 编辑失败
+    Service --&gt; Controller: 返回失败
+    Controller --&gt; UI: 提示错误
+    UI --&gt; 管理员: 显示错误信息
+end
+
+deactivate Service
+deactivate Controller
+deactivate UI
+
+@enduml

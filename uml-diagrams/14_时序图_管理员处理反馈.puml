@@ -1,0 +1,70 @@
+
+@startuml 管理员处理反馈时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 管理员
+participant "反馈管理页面" as UI
+participant "FeedbackController" as Controller
+participant "FeedbackService" as Service
+database "FeedbackMapper" as Mapper
+database "数据库" as DB
+
+管理员 -&gt; UI: 点击查看所有反馈
+activate UI
+UI -&gt; Controller: GET /feedback/all
+activate Controller
+Controller -&gt; Service: getAllFeedbacks()
+activate Service
+Service -&gt; Mapper: selectAll()
+activate Mapper
+Mapper -&gt; DB: SELECT * FROM feedback
+activate DB
+DB --&gt; Mapper: 返回反馈列表
+deactivate DB
+Mapper --&gt; Service: List&lt;Feedback&gt;
+deactivate Mapper
+Service --&gt; Controller: 返回反馈列表
+deactivate Service
+Controller --&gt; UI: 返回JSON数据
+deactivate Controller
+UI -&gt; UI: 渲染反馈列表
+UI --&gt; 管理员: 显示反馈列表
+
+管理员 -&gt; UI: 点击处理反馈
+activate UI
+UI -&gt; UI: 填写处理备注
+UI -&gt; 管理员: 显示处理表单
+
+管理员 -&gt; UI: 提交处理
+UI -&gt; Controller: POST /feedback/handle
+activate Controller
+Controller -&gt; Service: handleFeedback(id, handleRemark)
+activate Service
+Service -&gt; Mapper: updateStatus(id, 1, handleRemark)
+activate Mapper
+Mapper -&gt; DB: UPDATE feedback SET status=1, handle_time=?, handle_remark=?
+activate DB
+DB --&gt; Mapper: 返回更新结果
+deactivate DB
+Mapper --&gt; Service: 返回影响行数
+deactivate Mapper
+
+alt 处理成功
+    Service --&gt; Controller: 返回成功
+    Controller --&gt; UI: 返回成功信息
+    UI -&gt; UI: 刷新反馈状态更新
+    UI --&gt; 管理员: 显示处理成功
+else 处理失败
+    Service --&gt; Controller: 返回失败
+    Controller --&gt; UI: 返回失败信息
+    UI --&gt; 管理员: 显示错误信息
+end
+
+deactivate Service
+deactivate Controller
+deactivate UI
+
+@enduml

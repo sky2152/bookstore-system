@@ -1,0 +1,59 @@
+@startuml 用例图
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "访客" as Guest
+actor "普通用户" as User
+actor "管理员" as Admin
+
+rectangle "智能图书推荐系统" {
+    usecase "登录" as UC01
+    usecase "注册" as UC02
+    usecase "余额充值" as UC03
+    usecase "查看图书" as UC04
+    usecase "购买图书" as UC07
+    usecase "查看订单" as UC08
+    usecase "热门推荐" as UC09
+    usecase "基于历史推荐" as UC10
+    usecase "协同过滤推荐" as UC11
+    usecase "混合推荐" as UC12
+    usecase "图书管理" as UC13
+    usecase "分类管理" as UC14
+    usecase "批量导入" as UC15
+}
+
+Guest --> UC02
+Guest --> UC01
+
+User --> UC01
+User --> UC03
+User --> UC04
+User --> UC07
+User --> UC08
+User --> UC09
+User --> UC10
+User --> UC11
+User --> UC12
+
+Admin --> UC01
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+
+note right of UC09
+  基于销量统计
+  推荐热门图书
+end note
+
+note right of UC10
+  分析用户购买历史
+  推荐同类图书
+end note
+
+note right of UC11
+  协同过滤算法
+  找相似用户推荐
+end note
+
+@enduml

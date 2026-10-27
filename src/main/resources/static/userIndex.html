@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>图书商城</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.balance-box {
+    background: rgba(255,255,255,0.2);
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.balance-box strong {
+    font-size: 18px;
+    font-weight: 700;
+}
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+.nav-right a:hover {
+    background: rgba(255,255,255,0.35);
+}
+.container {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+}
+.card h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+.search-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.search-row input {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+    background: #f8f9fa;
+    flex: 1;
+}
+.search-row input:focus {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+.search-row select {
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    background: #f8f9fa;
+    cursor: pointer;
+}
+.btn-primary {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+th {
+    background: #f8f9fa;
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 2px solid #e5e7eb;
+}
+td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+tr:hover {
+    background: #fafbfc;
+}
+.price {
+    color: #e67e22;
+    font-weight: 700;
+    font-size: 16px;
+}
+.book-title {
+    font-weight: 600;
+    color: #333;
+}
+.category-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.buy-input {
+    padding: 10px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 70px;
+    outline: none;
+    transition: all 0.3s;
+    background: #f8f9fa;
+    text-align: center;
+}
+.buy-input:focus {
+    border-color: #27ae60;
+    background: white;
+}
+.btn-buy {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-buy:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(46,204,113,0.4);
+}
+.empty-row td {
+    text-align: center;
+    padding: 60px 12px;
+    color: #999;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal.active { display: flex; }
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-content h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+}
+.modal-content p {
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+.modal-content p strong {
+    color: #333;
+    font-size: 16px;
+}
+.modal-content textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    margin-top: 5px;
+}
+.btn-confirm {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    margin-right: 10px;
+    transition: all 0.3s;
+}
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(46,204,113,0.4);
+}
+.btn-cancel {
+    padding: 12px 28px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s;
+}
+.btn-cancel:hover { background: #7f8c8d; }
+
+.msg-box {
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none;
+}
+.msg-box.show { display: block; animation: fadeIn 0.3s; }
+.msg-box.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.msg-box.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+}
+.hot-card {
+    background: linear-gradient(135deg, #fff 0%, #faf8ff 100%);
+    border: 2px solid #f0ecff;
+    border-radius: 12px;
+    padding: 18px;
+    transition: all 0.3s;
+    position: relative;
+}
+.hot-card:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(102,126,234,0.15);
+}
+.hot-rank {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hot-rank.gold { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
+.hot-rank.silver { background: linear-gradient(135deg, #bdc3c7 0%, #e0e0e0 100%); color: #555; }
+.hot-rank.bronze { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); }
+.hot-card .hot-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    margin-left: 24px;
+}
+.hot-card .hot-author {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 8px;
+}
+.hot-card .hot-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.hot-card .hot-price {
+    color: #e67e22;
+    font-weight: 700;
+    font-size: 16px;
+}
+.hot-card .hot-sales {
+    font-size: 12px;
+    color: #e74c3c;
+    background: #fdf2f2;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>图书商城</h1>
+    <div class="nav-right">
+        <div class="balance-box">余额: <strong id="userBalance">加载中...</strong> 元</div>
+        <a href="/recommend.html">智能推荐</a>
+        <a href="/feedback.html">我的反馈</a>
+        <a href="/recharge.html">充值</a>
+        <a href="/myOrders.html">我的订单</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div id="msgBox" class="msg-box"></div>
+
+    <div class="card">
+        <h2>热销推荐</h2>
+        <div class="hot-grid" id="hotGrid">
+            <div style="grid-column:span 3;text-align:center;color:#999;padding:20px;">加载中...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>搜索图书</h2>
+        <div class="search-row">
+            <input type="text" id="keyword" placeholder="输入书名或作者关键字" onkeydown="if(event.key==='Enter')renderBooks()">
+            <select id="categoryFilter" onchange="renderBooks()">
+                <option value="">全部分类</option>
+            </select>
+            <button class="btn-primary" onclick="renderBooks()">搜索</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>图书列表</h2>
+        <table>
+            <tr>
+                <th>书名</th><th>作者</th><th>价格</th><th>库存</th><th>分类</th><th>购买数量</th><th>操作</th>
+            </tr>
+            <tr class="empty-row"><td colspan="7">加载中...</td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="modal" id="buyModal">
+    <div class="modal-content">
+        <h3>确认购买</h3>
+        <p>图书: <strong id="confirmBookName"></strong></p>
+        <p>购买数量: <strong id="confirmNum"></strong> 本</p>
+        <p>总金额: <strong id="confirmTotal" style="color:#e67e22;font-size:18px;">¥0</strong></p>
+        <p>余额: <strong id="confirmBalance"></strong></p>
+        <button class="btn-confirm" onclick="doBuy()">确认购买</button>
+        <button class="btn-cancel" onclick="closeBuy()">取消</button>
+    </div>
+</div>
+
+<div class="modal" id="feedbackModal">
+    <div class="modal-content">
+        <h3>缺货反馈</h3>
+        <p>图书: <strong id="feedbackBookName"></strong></p>
+        <p style="margin-top:10px;">补充说明：</p>
+        <textarea id="feedbackRemark" placeholder="请填写您的补充说明..."></textarea>
+        <button class="btn-confirm" onclick="submitFeedback()" style="margin-top:15px;">提交反馈</button>
+        <button class="btn-cancel" onclick="closeFeedback()">取消</button>
+    </div>
+</div>
+
+<script>
+console.log('=== 页面加载成功 ===');
+let currentBook = null;
+let currentNum = 0;
+let currentBalance = 0;
+let allBooks = [];
+let feedbackBook = null;
+
+function loadCategoryFilter() {
+    console.log('加载分类...');
+    fetch('/api/category/list')
+        .then(r => r.json())
+        .then(data => {
+            console.log('分类加载成功:', data);
+            let sel = document.getElementById('categoryFilter');
+            data.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.categoryName;
+                sel.appendChild(opt);
+            });
+        })
+        .catch(err => console.error('分类加载失败:', err));
+}
+
+function loadBalance() {
+    fetch('/api/user/balance')
+        .then(r => r.json())
+        .then(data => {
+            if(data && data.balance !== undefined) {
+                currentBalance = parseFloat(data.balance);
+                document.getElementById('userBalance').textContent = data.balance;
+            } else if(data && data.error) {
+                document.getElementById('userBalance').textContent = '未登录';
+            }
+        })
+        .catch(err => {
+            document.getElementById('userBalance').textContent = '加载失败';
+        });
+}
+
+function loadBooks() {
+    console.log('加载图书列表...');
+    fetch('/api/book/list')
+        .then(r => r.json())
+        .then(data => {
+            console.log('图书数据加载成功:', data);
+            allBooks = data;
+            renderBooks();
+        })
+        .catch(err => {
+            console.error('图书加载失败:', err);
+            document.querySelector('table').innerHTML =
+                '<tr class="empty-row"><td colspan="7" style="color:#e74c3c;">加载失败</td></tr>';
+        });
+}
+
+function getBookById(id) {
+    console.log('查找图书, ID:', id);
+    let book = allBooks.find(b => b.id == id);
+    console.log('找到图书:', book);
+    return book;
+}
+
+function renderBooks() {
+    console.log('渲染图书列表...');
+    let kw = document.getElementById('keyword').value.trim().toLowerCase();
+    let catId = document.getElementById('categoryFilter').value;
+    let filtered = allBooks.filter(b => {
+        let matchKw = !kw || (b.bookName && b.bookName.toLowerCase().includes(kw)) || (b.author && b.author.toLowerCase().includes(kw));
+        let matchCat = !catId || b.categoryId == catId;
+        return matchKw && matchCat;
+    });
+
+    let html = '<tr><th>书名</th><th>作者</th><th>价格</th><th>库存</th><th>分类</th><th>购买数量</th><th>操作</th></tr>';
+    if(filtered.length === 0) {
+        html += '<tr class="empty-row"><td colspan="7">未找到匹配的图书</td></tr>';
+    } else {
+        filtered.forEach(book => {
+            let stockCell = book.stock;
+            let actionCell = '';
+            if (book.stock > 0) {
+                actionCell = '<input type="number" id="num_' + book.id + '" value="1" min="1" max="' + book.stock + '" class="buy-input"></td>' +
+                    '<td><button class="btn-buy" data-book-id="' + book.id + '" onclick="confirmBuyById(' + book.id + ')">购买</button>';
+            } else {
+                stockCell = '<span style="color:#e74c3c;font-weight:600;">缺货</span>';
+                actionCell = '-</td><td><button class="btn-buy" style="background:linear-gradient(135deg,#ff9800 0%,#f57c00 100%);" data-book-id="' + book.id + '" onclick="console.log(\'点击反馈按钮, ID: ' + book.id + '\'); showFeedbackModalById(' + book.id + ')">反馈缺货</button>';
+            }
+            html += '<tr>' +
+                '<td><span class="book-title">' + book.bookName + '</span></td>' +
+                '<td>' + book.author + '</td>' +
+                '<td class="price">¥' + book.price + '</td>' +
+                '<td>' + stockCell + '</td>' +
+                '<td><span class="category-tag">' + (book.categoryName || '未分类') + '</span></td>' +
+                '<td>' + actionCell + '</td>' +
+                '</tr>';
+        });
+    }
+    document.querySelector('table').innerHTML = html;
+    console.log('图书列表渲染完成');
+}
+
+function confirmBuyById(id) {
+    let book = getBookById(id);
+    if (!book) return;
+    confirmBuy(book);
+}
+
+function confirmBuy(book) {
+    let numInput = document.getElementById('num_' + book.id);
+    let num = parseInt(numInput.value);
+    if(!num || num <= 0) {
+        showMsg('请输入正确的购买数量', 'error');
+        return;
+    }
+    if(num > book.stock) {
+        showMsg('库存不足，最多可购买 ' + book.stock + ' 本', 'error');
+        return;
+    }
+
+    let total = (parseFloat(book.price) * num).toFixed(2);
+
+    currentBook = book;
+    currentNum = num;
+    document.getElementById('confirmBookName').textContent = book.bookName;
+    document.getElementById('confirmNum').textContent = num;
+    document.getElementById('confirmTotal').textContent = '¥' + total;
+    document.getElementById('confirmBalance').textContent = '¥' + currentBalance.toFixed(2);
+    document.getElementById('buyModal').classList.add('active');
+}
+
+function doBuy() {
+    if(!currentBook) return;
+
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/buy';
+    form.innerHTML =
+        '<input name="bookId" value="' + currentBook.id + '">' +
+        '<input name="num" value="' + currentNum + '">';
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function closeBuy() {
+    document.getElementById('buyModal').classList.remove('active');
+}
+
+function showMsg(text, type) {
+    let box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg-box show ' + type;
+    setTimeout(() => { box.className = 'msg-box'; }, 3000);
+}
+
+function showFeedbackModalById(id) {
+    console.log('=== showFeedbackModalById 被调用, ID:', id, '===');
+    let book = getBookById(id);
+    if (!book) {
+        console.error('未找到图书, ID:', id);
+        showMsg('未找到图书', 'error');
+        return;
+    }
+    console.log('准备显示反馈弹窗, 图书:', book);
+    showFeedbackModal(book);
+}
+
+function showFeedbackModal(book) {
+    console.log('显示反馈弹窗...');
+    feedbackBook = book;
+    document.getElementById('feedbackBookName').textContent = book.bookName;
+    document.getElementById('feedbackRemark').value = '';
+    document.getElementById('feedbackModal').classList.add('active');
+    console.log('反馈弹窗已显示');
+}
+
+function closeFeedback() {
+    document.getElementById('feedbackModal').classList.remove('active');
+    feedbackBook = null;
+}
+
+function submitFeedback() {
+    console.log('提交反馈...');
+    if (!feedbackBook) {
+        showMsg('请先选择图书', 'error');
+        return;
+    }
+    
+    let remark = document.getElementById('feedbackRemark').value.trim();
+    console.log('反馈内容:', { bookId: feedbackBook.id, bookName: feedbackBook.bookName, remark: remark });
+    
+    fetch('/feedback/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'bookId=' + feedbackBook.id + '&bookName=' + encodeURIComponent(feedbackBook.bookName) + '&remark=' + encodeURIComponent(remark)
+    })
+    .then(r => {
+        console.log('反馈响应状态:', r.status);
+        if (!r.ok) {
+            throw new Error('网络错误');
+        }
+        return r.json();
+    })
+    .then(data => {
+        console.log('反馈响应数据:', data);
+        if (data.success) {
+            showMsg(data.message || '反馈提交成功', 'success');
+            closeFeedback();
+        } else {
+            showMsg(data.message || '反馈提交失败', 'error');
+        }
+    })
+    .catch(err => {
+        console.error('反馈提交失败:', err);
+        showMsg('提交失败，请重试', 'error');
+    });
+}
+
+loadBalance();
+loadBooks();
+loadCategoryFilter();
+
+(function(){
+    let params = new URLSearchParams(window.location.search);
+    let error = params.get('error');
+    let msg = params.get('msg');
+    if(error) showMsg(decodeURIComponent(error), 'error');
+    if(msg) showMsg(decodeURIComponent(msg), 'success');
+})();
+
+function loadHotBooks() {
+    fetch('/api/book/hot')
+        .then(r => r.json())
+        .then(data => {
+            if(!data || data.length === 0) {
+                document.getElementById('hotGrid').innerHTML =
+                    '<div style="grid-column:span 3;text-align:center;color:#999;padding:20px;">暂无销售数据</div>';
+                return;
+            }
+            let html = '';
+            data.forEach((book, i) => {
+                let rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+                html += '<div class="hot-card">' +
+                    '<div class="hot-rank ' + rankClass + '">' + (i+1) + '</div>' +
+                    '<div class="hot-title">' + book.bookName + '</div>' +
+                    '<div class="hot-author">' + book.author + '</div>' +
+                    '<div class="hot-bottom">' +
+                        '<span class="hot-price">¥' + book.price + '</span>' +
+                        '<span class="hot-sales">已售 ' + (book.sales || 0) + ' 本</span>' +
+                    '</div>' +
+                '</div>';
+            });
+            document.getElementById('hotGrid').innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById('hotGrid').innerHTML =
+                '<div style="grid-column:span 3;text-align:center;color:#e74c3c;padding:20px;">加载失败</div>';
+        });
+}
+loadHotBooks();
+</script>
+</body>
+</html>

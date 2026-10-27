@@ -1,0 +1,65 @@
+@startuml 协同过滤推荐时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 用户
+participant "推荐界面" as UI
+participant "RecommendController" as Controller
+participant "RecommendService" as Service
+database "OrderMapper" as OrderMapper
+database "BookMapper" as BookMapper
+
+用户 -> UI: 点击协同过滤推荐
+activate UI
+UI -> Controller: GET /recommend/collaborative
+activate Controller
+Controller -> Service: recommendByCollaborative(userId, 10)
+activate Service
+
+Service -> OrderMapper: selectAll()
+activate OrderMapper
+OrderMapper --> Service: 所有订单
+deactivate OrderMapper
+
+Service -> Service: 构建用户-图书矩阵
+Service -> Service: 获取当前用户购买的图书
+
+alt 当前用户无购买
+    Service -> Service: 调用热门推荐
+    Service -> BookMapper: selectAll()
+    activate BookMapper
+    BookMapper --> Service: 所有图书
+    deactivate BookMapper
+    Service -> Service: 按销量排序
+else 有购买数据
+    Service -> Service: 遍历其他用户
+    loop 每个其他用户
+        Service -> Service: 计算Jaccard相似度
+    end
+    
+    Service -> Service: 按相似度排序用户
+    Service -> Service: 取最相似的K个用户
+    
+    Service -> Service: 收集相似用户购买的图书
+    Service -> Service: 过滤当前用户已购买的
+    Service -> Service: 按权重排序图书
+    
+    Service -> BookMapper: selectById(bookId)
+    activate BookMapper
+    BookMapper --> Service: 图书信息
+    deactivate BookMapper
+end
+
+Service --> Controller: 返回推荐列表
+deactivate Service
+
+Controller --> UI: 返回JSON数据
+UI -> UI: 渲染推荐列表
+UI --> 用户: 显示推荐图书
+
+deactivate Controller
+deactivate UI
+
+@enduml

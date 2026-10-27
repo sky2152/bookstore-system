@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>书店登录</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.login-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 45px 40px;
+    width: 100%;
+    max-width: 420px;
+}
+.logo {
+    text-align: center;
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+.login-card h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 600;
+}
+.subtitle {
+    text-align: center;
+    color: #999;
+    margin-bottom: 35px;
+    font-size: 14px;
+}
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+.form-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s;
+    background: #f8f9fa;
+}
+.form-group input:focus {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102,126,234,0.4);
+}
+.tip {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #f0f0f0;
+}
+.tip a {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+.tip a:hover {
+    color: #764ba2;
+}
+.hint {
+    text-align: center;
+    margin-top: 15px;
+    color: #aaa;
+    font-size: 12px;
+}
+.msg-box {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none;
+}
+.msg-box.show {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+.msg-box.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.msg-box.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="login-card">
+    <div class="logo">📚</div>
+    <h2>书店管理系统</h2>
+    <p class="subtitle">欢迎登录</p>
+    <div id="msgBox" class="msg-box"></div>
+    <form action="/login" method="post">
+        <div class="form-group">
+            <input type="text" name="username" placeholder="请输入账号" required>
+        </div>
+        <div class="form-group">
+            <input type="password" name="password" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="btn-login">登录</button>
+    </form>
+    <div class="tip">
+        <a href="/register.html">普通用户注册 →</a>
+    </div>
+    <div class="hint">管理员测试账号: admin / 123456</div>
+</div>
+
+<script>
+// 读取URL参数显示提示
+(function(){
+    let params = new URLSearchParams(window.location.search);
+    let success = params.get('success');
+    let error = params.get('error');
+    
+    let msgBox = document.getElementById('msgBox');
+    
+    if(success === 'register'){
+        msgBox.textContent = '注册成功！请登录';
+        msgBox.className = 'msg-box show success';
+    } else if(error){
+        let errorMsg = '';
+        switch(error){
+            case 'admin': errorMsg = '该用户名不可使用'; break;
+            case 'duplicate': errorMsg = '用户名已被使用'; break;
+            case 'fail': errorMsg = '注册失败，请重试'; break;
+        }
+        if(errorMsg){
+            msgBox.textContent = errorMsg;
+            msgBox.className = 'msg-box show error';
+        }
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.book.mapper.BookMapper">
+    <insert id="insert">
+        insert into book(book_name, author, price, stock, category_id)
+        values(#{bookName}, #{author}, #{price}, #{stock}, #{categoryId})
+    </insert>
+
+    <delete id="deleteById">
+        delete from book where id=#{id}
+    </delete>
+
+    <update id="deductStock">
+        update book set stock = stock - #{num} where id = #{id} and stock >= #{num}
+    </update>
+
+    <update id="update">
+        update book set book_name=#{bookName},author=#{author},price=#{price},stock=#{stock},category_id=#{categoryId} where id=#{id}
+    </update>
+
+    <select id="selectAll" resultType="com.book.entity.Book">
+        select b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name
+        from book b left join category c on b.category_id = c.id
+    </select>
+
+    <select id="selectById" resultType="com.book.entity.Book">
+        select b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name
+        from book b left join category c on b.category_id = c.id
+        where b.id=#{id}
+    </select>
+
+    <select id="selectByCategoryId" resultType="com.book.entity.Book">
+        select b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name
+        from book b left join category c on b.category_id = c.id
+        where b.category_id=#{categoryId}
+    </select>
+
+    <select id="searchBook" resultType="com.book.entity.Book">
+        select b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name
+        from book b left join category c on b.category_id = c.id
+        where b.book_name like concat('%',#{keyword},'%') or b.author like concat('%',#{keyword},'%')
+    </select>
+
+    <select id="selectHotBooks" resultType="com.book.entity.Book">
+        select b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name,
+               coalesce(sum(o.buy_num),0) as sales
+        from book b
+        left join category c on b.category_id = c.id
+        left join orders o on o.book_id = b.id
+        group by b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name
+        order by sales desc
+        limit #{limit}
+    </select>
+
+    <select id="selectSalesStats" resultType="com.book.entity.Book">
+        select b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name,
+               coalesce(sum(o.buy_num),0) as sales
+        from book b
+        left join category c on b.category_id = c.id
+        left join orders o on o.book_id = b.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                b.book_name like concat('%',#{keyword},'%')
+                or b.author like concat('%',#{keyword},'%')
+            </if>
+        </where>
+        group by b.id,b.book_name,b.author,b.price,b.stock,b.category_id,c.category_name
+        order by sales desc
+    </select>
+</mapper>

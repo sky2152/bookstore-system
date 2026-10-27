@@ -1,0 +1,44 @@
+@startuml 用户登录时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 用户
+participant "登录界面" as UI
+participant "UserController" as Controller
+participant "UserService" as Service
+database "UserMapper" as Mapper
+database "数据库" as DB
+
+用户 -> UI: 输入账号密码
+activate UI
+UI -> Controller: /user/login
+activate Controller
+Controller -> Service: login(username, password)
+activate Service
+Service -> Mapper: selectByUsername(username)
+activate Mapper
+Mapper -> DB: SELECT * FROM user
+activate DB
+DB --> Mapper: 返回用户信息
+deactivate DB
+Mapper --> Service: User对象
+deactivate Mapper
+
+alt 密码正确
+    Service -> Service: 验证密码
+    Service --> Controller: 登录成功
+    Controller --> UI: 跳转首页
+    UI --> 用户: 显示首页
+else 密码错误
+    Service --> Controller: 登录失败
+    Controller --> UI: 提示错误
+    UI --> 用户: 显示错误信息
+end
+
+deactivate Service
+deactivate Controller
+deactivate UI
+
+@enduml

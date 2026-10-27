@@ -1,0 +1,60 @@
+@startuml 基于历史推荐时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 用户
+participant "推荐界面" as UI
+participant "RecommendController" as Controller
+participant "RecommendService" as Service
+database "OrderMapper" as OrderMapper
+database "BookMapper" as BookMapper
+
+用户 -> UI: 点击基于历史推荐
+activate UI
+UI -> Controller: GET /recommend/history
+activate Controller
+Controller -> Service: recommendByUserHistory(userId, 10)
+activate Service
+
+Service -> OrderMapper: selectByUserId(userId)
+activate OrderMapper
+OrderMapper --> Service: 用户订单列表
+deactivate OrderMapper
+
+alt 无购买历史
+    Service -> Service: 调用热门推荐
+    Service -> OrderMapper: selectAll()
+    activate OrderMapper
+    OrderMapper --> Service: 所有订单
+    deactivate OrderMapper
+    Service -> BookMapper: selectAll()
+    activate BookMapper
+    BookMapper --> Service: 所有图书
+    deactivate BookMapper
+    Service -> Service: 按销量排序
+else 有购买历史
+    Service -> Service: 统计购买类别
+    Service -> Service: 统计各类购买次数
+    
+    Service -> BookMapper: selectAll()
+    activate BookMapper
+    BookMapper --> Service: 所有图书
+    deactivate BookMapper
+    
+    Service -> Service: 过滤已购买图书
+    Service -> Service: 按类别相关度排序
+end
+
+Service --> Controller: 返回推荐列表
+deactivate Service
+
+Controller --> UI: 返回JSON数据
+UI -> UI: 渲染推荐列表
+UI --> 用户: 显示推荐图书
+
+deactivate Controller
+deactivate UI
+
+@enduml

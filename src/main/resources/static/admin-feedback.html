@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>缺货反馈管理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    color: #333;
+}
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+    margin-left: 10px;
+}
+.nav-right a:hover { background: rgba(255,255,255,0.35); }
+.container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+}
+.card h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th {
+    background: #f8f9fa;
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 2px solid #e5e7eb;
+}
+td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+tr:hover { background: #fafbfc; }
+.status-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.status-pending { background: #fff3cd; color: #856404; }
+.status-handled { background: #d4edda; color: #155724; }
+.empty-row td { text-align: center; padding: 60px 12px; color: #999; }
+.book-title { font-weight: 600; color: #333; }
+.remark-text { color: #666; max-width: 250px; }
+.handle-remark { background: #f8f9fa; padding: 8px 12px; border-radius: 8px; color: #555; margin-top: 5px; }
+.time-text { color: #999; font-size: 13px; }
+.btn-handle {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-handle:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal.active { display: flex; }
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-content h3 { margin-bottom: 15px; font-size: 18px; color: #333; }
+.modal-content p { margin-bottom: 10px; color: #666; font-size: 14px; }
+.modal-content textarea {
+    width: 100%;
+    height: 120px;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    margin-top: 10px;
+}
+.modal-content textarea:focus { border-color: #667eea; }
+.btn-confirm {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    margin-right: 10px;
+    transition: all 0.3s;
+}
+.btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+.btn-cancel {
+    padding: 10px 24px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s;
+}
+.btn-cancel:hover { background: #7f8c8d; }
+.msg-box {
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none;
+}
+.msg-box.show { display: block; animation: fadeIn 0.3s; }
+.msg-box.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.msg-box.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>🛠️ 缺货反馈管理</h1>
+    <div class="nav-right">
+        <a href="/book/list">← 返回图书管理</a>
+        <a href="/logout">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div id="msgBox" class="msg-box"></div>
+    
+    <div class="card">
+        <h2>反馈列表</h2>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>用户</th>
+                <th>图书名称</th>
+                <th>反馈内容</th>
+                <th>提交时间</th>
+                <th>状态</th>
+                <th>管理员回复</th>
+                <th>操作</th>
+            </tr>
+            <tr class="empty-row"><td colspan="8">加载中...</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- 处理反馈弹窗 -->
+<div class="modal" id="handleModal">
+    <div class="modal-content">
+        <h3>处理反馈</h3>
+        <p>用户: <strong id="handleUsername"></strong></p>
+        <p>图书: <strong id="handleBookName"></strong></p>
+        <p>反馈内容: <span id="handleRemark"></span></p>
+        <p style="margin-top:15px;">回复内容：</p>
+        <textarea id="handleReply" placeholder="请输入回复内容..."></textarea>
+        <button class="btn-confirm" onclick="submitHandle()">提交</button>
+        <button class="btn-cancel" onclick="closeHandleModal()">取消</button>
+    </div>
+</div>
+
+<script>
+let currentFeedbackId = null;
+
+function showMsg(text, type) {
+    let box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg-box show ' + type;
+    setTimeout(() => { box.className = 'msg-box'; }, 3000);
+}
+
+function loadFeedbacks() {
+    fetch('/feedback/all')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                document.querySelector('table').innerHTML =
+                    '<tr class="empty-row"><td colspan="8" style="color:#e74c3c;">' + data.message + '</td></tr>';
+                return;
+            }
+            if (!data.data || data.data.length === 0) {
+                document.querySelector('table').innerHTML =
+                    '<tr><th>ID</th><th>用户</th><th>图书名称</th><th>反馈内容</th><th>提交时间</th><th>状态</th><th>管理员回复</th><th>操作</th></tr>' +
+                    '<tr class="empty-row"><td colspan="8">暂无反馈记录</td></tr>';
+                return;
+            }
+
+            let html = '<tr><th>ID</th><th>用户</th><th>图书名称</th><th>反馈内容</th><th>提交时间</th><th>状态</th><th>管理员回复</th><th>操作</th></tr>';
+            data.data.forEach(fb => {
+                let statusClass = fb.status === 0 ? 'status-pending' : 'status-handled';
+                let statusText = fb.status === 0 ? '待处理' : '已处理';
+                let time = fb.createTime ? fb.createTime.replace('T', ' ').substring(0, 19) : '';
+                let handleTime = fb.handleTime ? fb.handleTime.replace('T', ' ').substring(0, 19) : '';
+                let handleRemark = fb.handleRemark ? '<div class="handle-remark">' + fb.handleRemark + '<div class="time-text" style="margin-top:5px;">' + handleTime + '</div></div>' : '-';
+                let actionBtn = fb.status === 0 ? 
+                    '<button class="btn-handle" onclick="openHandleModal(' + fb.id + ',\'' + fb.username.replace(/'/g, "\\'") + '\',\'' + fb.bookName.replace(/'/g, "\\'") + '\',\'' + (fb.remark || '').replace(/'/g, "\\'") + '\')">处理</button>' : 
+                    '-';
+                
+                html += '<tr>' +
+                    '<td>' + fb.id + '</td>' +
+                    '<td>' + fb.username + '</td>' +
+                    '<td><span class="book-title">' + fb.bookName + '</span></td>' +
+                    '<td class="remark-text">' + (fb.remark || '-') + '</td>' +
+                    '<td class="time-text">' + time + '</td>' +
+                    '<td><span class="status-tag ' + statusClass + '">' + statusText + '</span></td>' +
+                    '<td>' + handleRemark + '</td>' +
+                    '<td>' + actionBtn + '</td>' +
+                    '</tr>';
+            });
+            document.querySelector('table').innerHTML = html;
+        })
+        .catch(err => {
+            document.querySelector('table').innerHTML =
+                '<tr class="empty-row"><td colspan="8" style="color:#e74c3c;">加载失败</td></tr>';
+        });
+}
+
+function openHandleModal(id, username, bookName, remark) {
+    currentFeedbackId = id;
+    document.getElementById('handleUsername').textContent = username;
+    document.getElementById('handleBookName').textContent = bookName;
+    document.getElementById('handleRemark').textContent = remark || '-';
+    document.getElementById('handleReply').value = '';
+    document.getElementById('handleModal').classList.add('active');
+}
+
+function closeHandleModal() {
+    document.getElementById('handleModal').classList.remove('active');
+    currentFeedbackId = null;
+}
+
+function submitHandle() {
+    if (!currentFeedbackId) return;
+    let reply = document.getElementById('handleReply').value.trim();
+    
+    fetch('/feedback/handle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + currentFeedbackId + '&handleRemark=' + encodeURIComponent(reply)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showMsg(data.message, 'success');
+            closeHandleModal();
+            loadFeedbacks();
+        } else {
+            showMsg(data.message, 'error');
+        }
+    })
+    .catch(err => {
+        showMsg('提交失败，请重试', 'error');
+    });
+}
+
+// 初始化
+loadFeedbacks();
+</script>
+</body>
+</html>

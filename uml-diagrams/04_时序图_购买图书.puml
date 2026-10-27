@@ -1,0 +1,98 @@
+@startuml 购买图书时序图
+
+skinparam sequenceMessageAlign center
+skinparam noteBackgroundColor #e2f0ff
+skinparam noteBorderColor #2d8cf0
+
+actor 用户
+participant "购买界面" as UI
+participant "UserShopController" as Controller
+participant "BookService" as BookService
+participant "UserService" as UserService
+participant "OrderService" as OrderService
+database "BookMapper" as BookMapper
+database "UserMapper" as UserMapper
+database "OrderMapper" as OrderMapper
+
+用户 -> UI: 选择图书，输入数量
+activate UI
+UI -> Controller: POST /buy
+activate Controller
+Controller -> BookService: getBookById(bookId)
+activate BookService
+BookService -> BookMapper: selectById(bookId)
+activate BookMapper
+BookMapper --> BookMapper: SELECT * FROM book
+BookMapper --> BookService: Book对象
+deactivate BookService: 返回图书信息
+deactivate BookService
+
+Controller -> BookService: checkStock(bookId, num)
+activate BookService
+
+alt 库存不足
+    BookService --> Controller: 库存不足
+    Controller --> UI: 提示库存不足
+    UI --> 用户: 显示错误
+    deactivate Controller
+    deactivate UI
+    stop
+end
+
+BookService --> Controller: 库存充足
+
+Controller -> UserService: getUser(userId)
+activate UserService
+UserService -> UserMapper: selectById(userId)
+activate UserMapper
+UserMapper --> UserService: User对象
+deactivate UserMapper
+
+UserService -> UserService: 检查余额
+alt 余额不足
+    UserService --> Controller: 余额不足
+    Controller --> UI: 提示余额不足
+    UI --> 用户: 显示错误
+    deactivate UserService
+    deactivate Controller
+    deactivate UI
+    stop
+end
+
+UserService --> Controller: 余额充足
+deactivate UserService
+
+Controller -> BookService: deductStock(bookId, num)
+activate BookService
+BookService -> BookMapper: updateStock(bookId, num)
+activate BookMapper
+BookMapper --> BookService: 更新成功
+deactivate BookMapper
+BookService --> Controller: 扣减库存成功
+deactivate BookService
+
+Controller -> UserService: deductBalance(userId, totalMoney)
+activate UserService
+UserService -> UserMapper: updateBalance(userId, totalMoney)
+activate UserMapper
+UserMapper --> UserService: 更新成功
+deactivate UserMapper
+UserService --> Controller: 扣减余额成功
+deactivate UserService
+
+Controller -> OrderService: createOrder(userId, bookId, num, totalMoney)
+activate OrderService
+OrderService -> OrderMapper: insert(order)
+activate OrderMapper
+OrderMapper --> OrderService: 插入成功
+deactivate OrderMapper
+OrderService --> Controller: 订单创建成功
+deactivate OrderService
+
+Controller --> UI: 购买成功
+UI --> 用户: 跳转首页
+
+deactivate Controller
+deactivate UI
+
+@enduml
