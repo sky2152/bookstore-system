@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Mapper
 public interface UserMapper {
-    User login(User user);
+    /** 按用户名查询完整用户（含 password 哈希），登录时用于比对。 */
     User selectByUsername(String username);
     int insert(User user);
     int recharge(Integer id, BigDecimal money);

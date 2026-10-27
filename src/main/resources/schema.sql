@@ -15,7 +15,8 @@ DROP TABLE IF EXISTS user;
 CREATE TABLE user (
   id INT NOT NULL AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL,
-  password VARCHAR(20) NOT NULL,
+  -- BCrypt 哈希固定 60 字符，留足余量到 100
+  password VARCHAR(100) NOT NULL,
   role INT NOT NULL DEFAULT 2,
   balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (id),
@@ -92,9 +93,10 @@ CREATE TABLE notification (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 插入测试数据
+-- 两个账号的密码都是 123456，此处存的是 BCrypt 哈希（$2a$10$...），不能直接改回明文
 INSERT INTO user (username, password, role, balance) VALUES 
-('admin', '123456', 1, 9999.00),
-('testuser', '123456', 2, 1000.00);
+('admin', '$2a$10$OyqwDb.cu1YnYmFL/D4fjOaNpPLCqvZnFV5zM8z.VXIvMQH2ltTP2', 1, 9999.00),
+('testuser', '$2a$10$OyqwDb.cu1YnYmFL/D4fjOaNpPLCqvZnFV5zM8z.VXIvMQH2ltTP2', 2, 1000.00);
 
 INSERT INTO category (category_name) VALUES 
 ('计算机'),
