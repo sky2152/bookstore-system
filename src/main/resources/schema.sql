@@ -39,7 +39,8 @@ CREATE TABLE book (
   stock INT NOT NULL DEFAULT 0,
   category_id INT NOT NULL,
   sales INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  KEY idx_category_id (category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 订单表
@@ -51,7 +52,9 @@ CREATE TABLE orders (
   total_money DECIMAL(10,2) NOT NULL,
   status INT NOT NULL DEFAULT 0,
   create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_user_id (user_id),
+  KEY idx_book_id (book_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 缺货反馈表
@@ -65,7 +68,8 @@ CREATE TABLE feedback (
   status INT NOT NULL DEFAULT 0,
   create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   handle_time DATETIME,
-  handle_remark TEXT
+  handle_remark TEXT,
+  KEY idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 图书评论表
@@ -77,7 +81,11 @@ CREATE TABLE comment (
   rating INT NOT NULL,
   content TEXT,
   is_pinned INT NOT NULL DEFAULT 0,
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_book_id (book_id),
+  KEY idx_user_id (user_id),
+  -- 一单一评在数据库层再兜一次，服务层校验之外的第二道防线
+  UNIQUE KEY uk_order_id (order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 消息通知表
@@ -89,7 +97,8 @@ CREATE TABLE notification (
   content TEXT,
   related_id INT,
   is_read INT NOT NULL DEFAULT 0,
-  create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_user_read (user_id, is_read)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 插入测试数据
