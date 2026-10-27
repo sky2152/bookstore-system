@@ -41,14 +41,24 @@ public class UserShopController {
     @PostMapping("/buy")
     public String buyBook(Integer bookId, Integer num, HttpSession session){
         User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null){
+            return "redirect:/login.html";
+        }
+        if(bookId == null || num == null || num <= 0){
+            return "redirect:/userIndex.html?error=" + encode("购买数量无效");
+        }
         String result = bookService.buyBook(loginUser.getId(), bookId, num);
         if(!"success".equals(result)){
             String msg = mapBuyError(result);
-            return "redirect:/userIndex.html?error=" + java.net.URLEncoder.encode(msg, java.nio.charset.StandardCharsets.UTF_8);
+            return "redirect:/userIndex.html?error=" + encode(msg);
         }
         User updated = userService.selectById(loginUser.getId());
         session.setAttribute("loginUser", updated);
-        return "redirect:/userIndex.html?msg=" + java.net.URLEncoder.encode("购买成功", java.nio.charset.StandardCharsets.UTF_8);
+        return "redirect:/userIndex.html?msg=" + encode("购买成功");
+    }
+
+    private static String encode(String text){
+        return java.net.URLEncoder.encode(text, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private String mapBuyError(String code){
@@ -78,6 +88,12 @@ public class UserShopController {
     @PostMapping("/user/recharge")
     public String recharge(Integer money, HttpSession session){
         User loginUser = (User) session.getAttribute("loginUser");
+        if(loginUser == null){
+            return "redirect:/login.html";
+        }
+        if(money == null || money <= 0){
+            return "redirect:/recharge.html?error=" + encode("充值金额无效");
+        }
         userService.recharge(loginUser.getId(), new BigDecimal(money));
         User updated = userService.selectById(loginUser.getId());
         session.setAttribute("loginUser", updated);

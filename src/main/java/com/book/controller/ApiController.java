@@ -54,12 +54,18 @@ public class ApiController {
     @GetMapping("/user/balance")
     public Object userBalance(HttpSession session){
         User user = (User) session.getAttribute("loginUser");
+        if(user == null){
+            return java.util.Map.of("error", "未登录");
+        }
         return java.util.Map.of("balance", user.getBalance());
     }
 
     @GetMapping("/user/orders")
     public Object userOrders(HttpSession session){
         User user = (User) session.getAttribute("loginUser");
+        if(user == null){
+            return java.util.Map.of("error", "未登录");
+        }
         return orderService.getUserOrders(user.getId());
     }
     
